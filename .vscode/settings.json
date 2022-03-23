@@ -1,0 +1,20 @@
+{
+    "editor.formatOnPaste": true,
+    "editor.formatOnSave": true,
+    "cmake.configureOnEdit": false,
+    "cmake.sourceDirectory": "${workspaceFolder}/camelServe",
+    "cmake.configureSettings": {
+        "BUILD_SHARED_LIBS": "ON",
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CS_PEDANTIC": "ON",
+        "CS_WERROR": "ON",
+    },
+    "files.trimTrailingWhitespace": true,
+    "clang-format.executable": "/usr/bin/clang-format",
+    "C_Cpp.default.cppStandard": "c++17",
+    "files.associations": {
+        "cstdio": "cpp",
+        "filesystem": "cpp"
+    },
+    "cmake.configureOnOpen": true
+}
