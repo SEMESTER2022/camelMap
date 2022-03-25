@@ -2,12 +2,12 @@
 #include "util/fs.h"
 #include "util/string.h"
 
-#include <iostream>
+#include "graph/def.h"
+
 
 int main() {
-  // util::path path{"/home/balebom/github/teamwork/camelMap/data"};
-  fmt::print("my path: {}\n", "show hande");
-  std::cout << GetString() << "ok\n";
-  std::cout << "Balebom\n";
+  graph::SearchResult search_result{
+      graph::GResultTypes::TOTAL_DIST_ONLY, {{1, 2}, {3, 4}}, {{5, 6}, {7, 8}}};
+  fmt::print("{}", search_result.ToString());
   return 0;
 }

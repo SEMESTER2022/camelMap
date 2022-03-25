@@ -4,6 +4,7 @@
     "cmake.configureOnEdit": false,
     "cmake.sourceDirectory": "${workspaceFolder}/camelServe",
     "cmake.configureSettings": {
+        "CMAKE_INSTALL_PREFIX": "../../camelMap.image/camelServe",
         "BUILD_SHARED_LIBS": "ON",
         "CMAKE_BUILD_TYPE": "Debug",
         "CS_PEDANTIC": "ON",
@@ -12,9 +13,5 @@
     "files.trimTrailingWhitespace": true,
     "clang-format.executable": "/usr/bin/clang-format",
     "C_Cpp.default.cppStandard": "c++17",
-    "files.associations": {
-        "cstdio": "cpp",
-        "filesystem": "cpp"
-    },
     "cmake.configureOnOpen": true
 }

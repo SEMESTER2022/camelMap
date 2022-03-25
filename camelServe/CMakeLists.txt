@@ -28,7 +28,7 @@ endfunction()
 if (NOT CMAKE_BUILD_TYPE)
     set_verbose(CMAKE_BUILD_TYPE "Debug" CACHE STRING
                 "Choose build type, all options available include"
-                "..Debug.., ..Release.., ..RelWithDebInfo.. and ..MinSizeRel..")
+                "``Debug``, ``Release``, ``RelWithDebInfo`` and ``MinSizeRel``")
 endif()
 
 set(CS_DEBUG_MODE OFF)
@@ -40,6 +40,10 @@ option(CS_PEDANTIC "Enable extra warning using standard language flags" OFF)
 option(CS_WERROR "Halt compiler warning into errors" OFF)
 option(CS_TEST "Generate test target module when debug" ${CS_DEBUG_MODE})
 
+set_verbose(CMAKE_TOOLCHAIN_FILE "${CMAKE_CURRENT_SOURCE_DIR}/external/vcpkg/scripts/buildsystems/vcpkg.cmake" CACHE STRING
+            "vcpkg tool chain file - crossplatform c++ package manager "
+            "https://github.com/microsoft/vcpkg")
+
 project(CS CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -47,13 +51,6 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 include(CheckCXXCompilerFlag)
-
-set_verbose(CMAKE_TOOLCHAIN_FILE "${CMAKE_CURRENT_SOURCE_DIR}/external/vcpkg/scripts/buildsystems/vcpkg.cmake" CACHE STRING
-            "vcpkg tool chain file - crossplatform c++ package manager "
-            "https://github.com/microsoft/vcpkg")
-
-set_verbose(VCPKG_TARGET_TRIPLET "triplets/x64-linux-shared" CACHE STRING
-            "set triplet for building shared library")
 
 if (CMAKE_CXX_COMPILER_ID MATCHES "GNU")
     set(CS_PEDANTIC_FLAGS -pedantic -Wall -pedantic-errors -Werror
@@ -120,7 +117,10 @@ if (BUILD_SHARED_LIBS)
     target_compile_definitions(cs PRIVATE CS_EXPORT INTERFACE CS_SHARED)
 endif()
 
+# linking all dependencies library
 target_link_libraries(cs PUBLIC LibFmt)
+target_link_libraries(cs PUBLIC LibSpdLog)
+target_link_libraries(cs PUBLIC LibMongoCXX)
 
 # main program
 add_executable(camelServe src/main.cpp)

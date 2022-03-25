@@ -5,6 +5,8 @@
     "dependencies": [
         "mongo-cxx-driver",
         "fmt",
-        "spdlog"
+        "spdlog",
+        "nlohmann-json",
+        "json-schema-validator"
     ]
 }
