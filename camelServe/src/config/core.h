@@ -94,15 +94,6 @@
 #	define CS_CONSTEXPR
 #endif
 
-#ifndef CS_EXCEPTIONS
-#	if (defined(__GNUC__) && !defined(__EXCEPTIONS)) || \
-		CS_MSC_VER && !_HAS_EXCEPTIONS
-#		define CS_EXCEPTIONS 0
-#	else
-#		define CS_EXCEPTIONS 1
-#	endif
-#endif
-
 #ifndef CS_FALLTHROUGH
 #	if CS_HAS_CPP_ATTRIBUTE(fallthrough)
 #		define CS_FALLTHROUGH [[fallthrough]]
@@ -125,14 +116,6 @@
 #	define CS_USE_EXPERIMENTAL_STRING_VIEW
 #else
 	CS_ERROR("Missing <string_view> on system")
-#endif
-
-#if (CS_HAS_INCLUDE(<filesystem>))
-#	define CS_USE_FILESYSTEM
-#elif CS_HAS_INCLUDE("experimental/filesystem")
-#	define CS_USE_EXPERIMENTAL_FILESYSTEM
-#else
-	CS_ERROR("Missing <filesystem> on system")
 #endif
 
 #if defined(_WIN32)

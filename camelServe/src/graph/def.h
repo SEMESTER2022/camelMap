@@ -2,16 +2,32 @@
 #define GRAPH_DEF_H
 
 #include <array>
+#include <queue>
 #include <string>
 #include <vector>
 
 namespace graph {
 using Vertex = uint32_t;
-using Dist = float;
+using Weight = float;
 using Coordinate = std::array<float, 2>;
-using AdjacentList = std::vector<std::vector<std::pair<Vertex, Dist>>>;
+using VisitedList = std::vector<bool>;
+using WeightList = std::vector<Weight>;
+using VertexList = std::vector<Vertex>;
+using TargetList = std::vector<std::pair<Vertex, Weight>>;
+using AdjacentList = std::vector<TargetList>;
 using CoordinateList = std::vector<Coordinate>;
-const Dist kInfinite = std::numeric_limits<Dist>::max();
+using MinPriorityQueue =
+    std::priority_queue<Vertex, VertexList, std::greater<Vertex>>;
+
+const Weight kInfinite = std::numeric_limits<Weight>::max();
+
+enum GProcessStatus : uint32_t {
+  NONE = 0,
+  UNPROCESS,
+  ONPROCESSING,
+  FAILED,
+  PROCESSED,
+};
 
 enum GResultTypes : uint32_t {
   TOTAL_DIST_ONLY = 0,
@@ -21,10 +37,12 @@ enum GResultTypes : uint32_t {
 
 struct SearchResult {
   GResultTypes m_result_type;
+  bool m_is_success{false};
+  Weight m_total_dist{0};
   CoordinateList m_shortest_coor_list;
   CoordinateList m_visitted_none_shortest_coor_list;
 
-  std::string ToString();
+  std::string ToJsonStr();
 };
 
 } // namespace graph

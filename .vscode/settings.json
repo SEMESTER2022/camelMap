@@ -13,5 +13,9 @@
     "files.trimTrailingWhitespace": true,
     "clang-format.executable": "/usr/bin/clang-format",
     "C_Cpp.default.cppStandard": "c++17",
-    "cmake.configureOnOpen": true
+    "cmake.configureOnOpen": true,
+    "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
+    "files.associations": {
+        "*.tcc": "cpp"
+    }
 }

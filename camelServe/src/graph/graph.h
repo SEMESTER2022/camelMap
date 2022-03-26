@@ -4,49 +4,40 @@
 #include <limits>
 #include <memory>
 #include <mutex>
+#include <optional>
 #include <queue>
 #include <type_traits>
 #include <vector>
 
 #include "config/core.h"
+#include "graph/algo_dijkstra.h"
 #include "graph/algorithm.h"
 #include "graph/def.h"
-#include "util/fs.h"
 
 namespace graph {
-enum GFlags : unint32_t {
-  NONE = 0,
-  UNPROCESS,
-  ONPROCESSING,
-  PROCESSED,
-};
-
 class Graph {
 private:
-  std::mutex m_cs;
-  FILE *m_fileout;
-  std::atomic<uint32_t> m_graph_status{0};
-
-  Algorithm m_search_strategy;
-
-  AdjacentList m_adjacent_list;
+  std::unique_ptr<Algorithm> m_search_strategy;
 
 public:
-  fs::path m_file_in_path;
-  fs::path m_file_out_path;
-
-  bool InitGraph();
-  bool Enabled() const {
-    std::scoped_lock<std::mutex> mt { this->m_cs; };
-    return this->m_graph_status == GFlags::PROCESSED;
+  bool InitGraph() {
+    assert(this->m_search_strategy != nullptr);
+    return this->m_search_strategy->InitGraphV();
   }
 
-  void AssignRuntimeStrategy(Algorithm &strategy) const {
-    this->m_search_strategy = std::move(strategy);
+  bool Enabled() const {
+    assert(this->m_search_strategy != nullptr);
+    return this->m_search_strategy->EnabledV();
+  }
+
+  void AssignRuntimeStrategy(std::unique_ptr<Algorithm> search_strategy) {
+    this->m_search_strategy = std::move(search_strategy);
   };
 
-  std::string DoSearch(const Vertex &&source, const Vertex &&target) noexcept {
-    return std::move(this->m_search_strategy->DoQueryV(source, target));
+  std::string DoSearch(Vertex &&source, Vertex &&target) {
+    assert(this->m_search_strategy != nullptr);
+    return this->m_search_strategy->DoQueryV(std::move(source),
+                                             std::move(target));
   }
 };
 
@@ -54,10 +45,10 @@ public:
 
 graph::Graph &GraphInstance();
 
-static inline std::string GraphSearchf(const Vertex &&source,
-                                       const Vertex &&target) noexcept {
+static inline std::optional<std::string>
+GraphSearchf(graph::Vertex &&source, graph::Vertex &&target) noexcept {
   if (GraphInstance().Enabled()) {
-    return std::move(GraphInstance().DoSearch());
+    return GraphInstance().DoSearch(std::move(source), std::move(target));
   }
 
   return std::nullopt;

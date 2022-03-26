@@ -20,16 +20,20 @@ const GResultTypeDef ResultTypeDefs[] =
 };
 // clang-format on
 
-std::string SearchResult::ToString() {
-  std::string out = fmt::format(R"(
-            {{"type": {},
-            "shortest_coordinate": {},
-            "visited_none_shortest_coordinate": {}}}
-
-    )",
-                                ResultTypeDefs[this->m_result_type].name,
-                                this->m_shortest_coor_list,
-                                this->m_visitted_none_shortest_coor_list);
+std::string SearchResult::ToJsonStr() {
+  std::string out =
+      fmt::format(R"(
+            {{
+              "type": "{}",
+              "is_success": {}.
+              "total_dist": {},
+              "shortest_coordinate": {},
+              "visited_none_shortest_coordinate": {}
+            }}
+          )",
+                  ResultTypeDefs[this->m_result_type].name, this->m_is_success,
+                  this->m_total_dist, this->m_shortest_coor_list,
+                  this->m_visitted_none_shortest_coor_list);
 
   return out;
 }
