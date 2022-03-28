@@ -1,20 +1,22 @@
 #ifndef GRAPH_ALGO_ASTAR_H
 #define GRAPH_ALGO_ASTAR_H
 
-#include "graph/algorithm.h"
+#include "graph/algo_dijkstra.h"
 #include "graph/def.h"
 
 namespace graph {
-class AlgoBiAstar : public Algorithm {
+class AlgoAstar : public AlgoDijkstra {
 private:
-public:
-  AlgoBiAstar() {}
+  PotentialWeightList m_potential_dist;
 
-  bool InitGraphV() override;
-  bool EnabledV() override;
-  std::string DoQueryV(Vertex &&source, Vertex &&target) override {
-    return this->m_search_result.ToJsonStr();
-  }
+  double PotentialFunction();
+  bool PreProcessBiDijkstraing();
+
+public:
+  AlgoAstar() {}
+
+  bool InitStrategyV() override;
+  std::string DoQueryV(Vertex &&source, Vertex &&target) override;
 };
 } // namespace graph
 

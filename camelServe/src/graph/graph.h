@@ -20,9 +20,9 @@ private:
   std::unique_ptr<Algorithm> m_search_strategy;
 
 public:
-  bool InitGraph() {
+  bool InitStrategy() {
     assert(this->m_search_strategy != nullptr);
-    return this->m_search_strategy->InitGraphV();
+    return this->m_search_strategy->InitStrategyV();
   }
 
   bool Enabled() const {

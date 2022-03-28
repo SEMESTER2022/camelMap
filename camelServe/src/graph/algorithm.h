@@ -13,7 +13,7 @@
 namespace graph {
 class Algorithm {
 private:
-  void add_edge_serialize(TargetList &list, Vertex& node, Weight& weight) {
+  void AddEdgeSerialize(TargetList &list, Vertex &node, Weight &weight) {
     for (auto &[target, weight_target] : list) {
       if (target == node && weight_target > weight) {
         weight_target = weight;
@@ -24,11 +24,6 @@ private:
     list.emplace_back(std::make_pair(node, weight));
   }
 
-  void add_edge(Vertex& source, Vertex& target, Weight& weight) {
-    this->add_edge_serialize(this->m_outgoing_edges[source], target, weight);
-    this->add_edge_serialize(this->m_incoming_edges[target], source, weight);
-  }
-
 protected:
   std::string m_path_in_coor;
   std::string m_path_in_dist;
@@ -37,15 +32,20 @@ protected:
 
   uint32_t m_process_status{0};
 
-  SearchResult m_search_result;
-
   AdjacentList m_incoming_edges;
   AdjacentList m_outgoing_edges;
+  CoordinateList m_coordinates;
 
   bool ReadFileToAdjacentList();
+  bool ReadFileToCoordinateList();
+
+  void AddEdge(Vertex &source, Vertex &target, Weight &weight) {
+    this->AddEdgeSerialize(this->m_outgoing_edges[source], target, weight);
+    this->AddEdgeSerialize(this->m_incoming_edges[target], source, weight);
+  }
 
 public:
-  Algorithm() : m_search_result(SearchResult{}) {}
+  Algorithm() {}
   ~Algorithm() = default;
 
 public:
@@ -60,9 +60,9 @@ public:
     this->m_path_out_graph = std::move(out_graph);
   }
 
-  virtual bool InitGraphV() = 0;
-  virtual bool EnabledV() = 0;
+  bool EnabledV() { return this->m_process_status; }
 
+  virtual bool InitStrategyV() = 0;
   virtual std::string DoQueryV(Vertex &&source, Vertex &&target) = 0;
 };
 } // namespace graph

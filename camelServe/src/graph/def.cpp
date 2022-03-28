@@ -25,7 +25,7 @@ std::string SearchResult::ToJsonStr() {
       fmt::format(R"(
             {{
               "type": "{}",
-              "is_success": {}.
+              "is_success": {},
               "total_dist": {},
               "shortest_coordinate": {},
               "visited_none_shortest_coordinate": {}

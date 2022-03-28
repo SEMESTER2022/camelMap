@@ -12,16 +12,16 @@ class AlgoDijkstra : public Algorithm {
 private:
 protected:
   template <class BreakCondition, class UpdateBestDist>
-  bool Process(AdjacentList &adj, VisitedList &visited, WeightList &distance,
-               MinPriorityQueue &pq, BreakCondition break_condition,
-               UpdateBestDist update_best_dist);
+  bool Process(AdjacentList &, VisitedList &, WeightList &, MinPriorityQueue &,
+               BreakCondition, UpdateBestDist);
 
+  std::string Dijkstra(Vertex &&, Vertex &&);
   std::string BiDijkstra(Vertex &&, Vertex &&);
+  bool ReadGraphRawDataFromFile();
 
 public:
   AlgoDijkstra() : Algorithm() {}
-  bool InitGraphV() override;
-  bool EnabledV() override { return this->m_process_status; }
+  bool InitStrategyV() override;
 
   std::string DoQueryV(Vertex &&, Vertex &&) override;
 };

@@ -40,22 +40,33 @@ bool graph::AlgoDijkstra::Process(AdjacentList &adj, VisitedList &visited,
   return true;
 }
 
-std::string graph::AlgoDijkstra::BiDijkstra(Vertex &&source, Vertex &&target) {
-  if (source == target) {
-    return this->m_search_result.ToJsonStr();
-  }
+std::string graph::AlgoDijkstra::Dijkstra(Vertex &&source, Vertex &&target) {
+  // TODO: implement Dijkstra
 
+  return "";
+}
+
+std::string graph::AlgoDijkstra::BiDijkstra(Vertex &&source, Vertex &&target) {
+  SearchResult search_result{};
   auto num_nodes = this->m_outgoing_edges.size();
+
+  if (source == target || source >= num_nodes || target >= num_nodes) {
+    return search_result.ToJsonStr();
+  }
 
   WeightList dist(num_nodes, kInfinite);
   VisitedList visited(num_nodes, false);
-  MinPriorityQueue minPq;
+  auto compare_distance = [&](Vertex u, Vertex v) { return dist[u] > dist[v]; };
+  MinPriorityQueue<decltype(compare_distance)> minPq(compare_distance);
   dist[source] = 0;
   minPq.emplace(source);
 
   WeightList distR(num_nodes, kInfinite);
   VisitedList visitedR(num_nodes, false);
-  MinPriorityQueue minPqR;
+  auto compare_distanceR = [&](Vertex u, Vertex v) {
+    return distR[u] > dist[v];
+  };
+  MinPriorityQueue<decltype(compare_distanceR)> minPqR(compare_distanceR);
   distR[target] = 0;
   minPqR.emplace(target);
 
@@ -88,29 +99,33 @@ std::string graph::AlgoDijkstra::BiDijkstra(Vertex &&source, Vertex &&target) {
                        })) {
   }
 
-  if (minPq.empty() || minPqR.empty() || best_dist == kInfinite) {
-    this->m_search_result.m_is_success = false;
-  } else {
-    this->m_search_result.m_is_success = true;
-    this->m_search_result.m_total_dist = best_dist;
+  if (!(minPq.empty() || minPqR.empty() || best_dist == kInfinite)) {
+    search_result.m_is_success = true;
+    search_result.m_total_dist = best_dist;
   }
 
-  return this->m_search_result.ToJsonStr();
+  return search_result.ToJsonStr();
 }
 
-bool graph::AlgoDijkstra::InitGraphV() {
+bool graph::AlgoDijkstra::ReadGraphRawDataFromFile() {
   bool ok = this->ReadFileToAdjacentList();
+
   if (ok == false) {
-    this->m_process_status = GProcessStatus::FAILED;
+    return false;
   }
 
-  this->m_process_status =
-      ok ? GProcessStatus::PROCESSED : GProcessStatus::FAILED;
+  return this->ReadFileToCoordinateList();
+}
 
-  return ok;
+bool graph::AlgoDijkstra::InitStrategyV() {
+  return std::move(this->ReadGraphRawDataFromFile());
 }
 
 std::string graph::AlgoDijkstra::DoQueryV(Vertex &&source, Vertex &&target) {
+  bool ok = this->BiDijkstra(std::move(source), std::move(target));
 
-  return std::move(this->BiDijkstra(std::move(source), std::move(target)));
+  this->m_process_status = ok ? GProcessBiDijkstraStatus::PROCESSED
+                              : GProcessBiDijkstraStatus::FAILED;
+
+  return ok;
 }

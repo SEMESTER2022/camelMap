@@ -8,20 +8,22 @@
 
 namespace graph {
 using Vertex = uint32_t;
-using Weight = float;
-using Coordinate = std::array<float, 2>;
+using Weight = uint64_t;
+using Coordinate = std::array<int, 2>;
 using VisitedList = std::vector<bool>;
 using WeightList = std::vector<Weight>;
+using PotentialWeightList = std::vector<double>;
 using VertexList = std::vector<Vertex>;
 using TargetList = std::vector<std::pair<Vertex, Weight>>;
 using AdjacentList = std::vector<TargetList>;
 using CoordinateList = std::vector<Coordinate>;
-using MinPriorityQueue =
-    std::priority_queue<Vertex, VertexList, std::greater<Vertex>>;
+
+template <class WeightCompare>
+using MinPriorityQueue = std::priority_queue<Vertex, VertexList, WeightCompare>;
 
 const Weight kInfinite = std::numeric_limits<Weight>::max();
 
-enum GProcessStatus : uint32_t {
+enum GProcessBiDijkstraStatus : uint32_t {
   NONE = 0,
   UNPROCESS,
   ONPROCESSING,
