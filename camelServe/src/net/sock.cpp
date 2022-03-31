@@ -47,47 +47,12 @@ SOCKET Sock::Release() {
 
 void net::Sock::Reset() { CloseSocket(m_socket); }
 
-ssize_t net::Sock::Send(const void *data, size_t len, int flags) const {
-  return send(m_socket, static_cast<const char *>(data), len, flags);
+int net::Sock::Read(void *buf, size_t len) const {
+  return read(m_sock, static_cast<char *>(buf), len);
 }
 
-ssize_t Sock::Recv(void *buf, size_t len, int flags) const {
-  return recv(m_socket, static_cast<char *>(buf), len, flags);
-}
-
-int net::Sock::Connect(const sockaddr *addr, socklen_t addr_len) const {
-  return connect(m_socket, addr, addr_len);
-}
-
-std::unique_ptr<Sock> net::Sock::Accept(sockaddr *addr,
-                                        socklen_t *addr_len) const {
-#ifdef WIN32
-  static constexpr auto ERR = INVALID_SOCKET;
-#else
-  static constexpr auto ERR = SOCKET_ERROR;
-#endif
-
-  std::unique_ptr<Sock> sock;
-  const auto socket = accept(m_socket, addr, addr_len);
-  if (socket != ERR) {
-    try {
-      sock = std::make_unique<Sock>(socket);
-    } catch (const std::exception &) {
-#ifdef WIN32
-      closesocket(socket);
-#else
-      close(socket);
-#endif
-    }
-  }
-
-  return sock;
-}
-
-int net::Sock::GetSockOpt(int level, int opt_name, void *opt_val,
-                          socklen_t *opt_len) const {
-  return getsockopt(m_socket, level, opt_name, static_cast<char *>(opt_val),
-                    opt_len);
+int net::Sock::Write(void *buf, size_t len) const {
+  return write(m_sock, static_cast<char *>(buf), len);
 }
 
 bool net::Sock::Wait(std::chrono::milliseconds timeout, Sock::Event requested,
@@ -124,13 +89,12 @@ bool net::Sock::Wait(std::chrono::milliseconds timeout, Sock::Event requested,
 }
 
 void net::Sock::SendComplete(const std::string &data,
-                             std::chrono::milliseconds timeout,
-                             CThreadInterrupt &interrupt) const {
+                             std::chrono::milliseconds timeout) const {
   const auto deadline = GetTime<std::chrono::milliseconds>() + timeout;
   size_t sent{0};
 
   for (;;) {
-    const ssize_t ret{Send(data.data() + sent, data.size() - sent, 0)};
+    const ssize_t ret{Write(data.data() + sent, data.size() - sent)};
     if (ret > 0) {
       sent += static_cast<size_t>(ret);
       if (sent == data.size()) {
@@ -152,12 +116,6 @@ void net::Sock::SendComplete(const std::string &data,
                       sent, data.size()));
     }
 
-    if (interrupt) {
-      throw std::runtime_error(
-          fmt::format("Send interrupted (sent only {} of {} bytes before that)",
-                      sent, data.size()));
-    }
-
     const auto wait_time =
         std::min(deadline - now, std::chrono::milliseconds{MAX_WAIT_FOR_IO});
     (void)Wait(wait_time, SEND);
@@ -166,7 +124,6 @@ void net::Sock::SendComplete(const std::string &data,
 
 std::string net::Sock::RecvUntilTerminator(uint8_t terminator,
                                            std::chrono::milliseconds timeout,
-                                           CThreadInterrupt &interrupt,
                                            size_t max_data) const {
   const auto deadline = GetTime<std::chrono::milliseconds>() + timeout;
   std::string data;
@@ -182,14 +139,14 @@ std::string net::Sock::RecvUntilTerminator(uint8_t terminator,
     char buf[512];
 
     const ssize_t peek_ret{
-        Recv(buf, std::min(sizeof(buf), max_data - data.size()), MSG_PEEK)};
+        Read(buf, std::min(sizeof(buf), max_data - data.size()), MSG_PEEK)};
 
     switch (peek_ret) {
     case -1: {
       const int err{WSAGetLastError()};
       if (IOErrorIsPermanent(err)) {
         throw std::runtime_error(
-            fmt::format("recv(): {}", NetworkErrorString(err)));
+            fmt::format("read(): {}", NetworkErrorString(err)));
       }
       break;
     }
@@ -203,10 +160,10 @@ std::string net::Sock::RecvUntilTerminator(uint8_t terminator,
       const size_t try_len{terminator_found ? terminator_pos - buf + 1
                                             : static_cast<size_t>(peek_ret)};
 
-      const ssize_t read_ret{Recv(buf, try_len, 0)};
+      const ssize_t read_ret{Read(buf, try_len)};
       if (read_ret < 0 || static_cast<size_t>(read_ret) != try_len) {
         throw std::runtime_error(
-            fmt::format("recv() returned {} bytes on attempt to read {} bytes "
+            fmt::format("read() returned {} bytes on attempt to read {} bytes "
                         "but previos peek claimed {} bytes are available",
                         read_ret, try_len, peek_ret));
       }
@@ -227,44 +184,11 @@ std::string net::Sock::RecvUntilTerminator(uint8_t terminator,
           data.size()));
     }
 
-    if (interrupt) {
-      throw std::runtime_error(
-          strprintf("Receive interrupted (received %u bytes without terminator "
-                    "before that)",
-                    data.size()));
-    }
-
     // Wait for a short while (or the socket to become ready for reading) before
     // retrying.
     const auto wait_time =
         std::min(deadline - now, std::chrono::milliseconds{MAX_WAIT_FOR_IO});
     (void)Wait(wait_time, RECV);
-  }
-}
-
-bool net::Sock::IsConnected(std::string &errmsg) const {
-  if (m_socket == INVALID_SOCKET) {
-    errmsg = "not connected";
-    return false;
-  }
-
-  char c;
-  switch (Recv(&c, sizeof(c), MSG_PEEK)) {
-  case -1: {
-    const int err = WSAGetLastError();
-    if (IOErrorIsPermanent(err)) {
-      errmsg = NetworkErrorString(err);
-      return false;
-    }
-
-    return true;
-  }
-
-  case 0:
-    errmsg = "closed";
-    return false;
-  default:
-    return true;
   }
 }
 

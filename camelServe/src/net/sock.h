@@ -52,8 +52,6 @@ namespace net {
 #endif
 // clang-format on
 
-static constexpr auto MAX_WAIT_FOR_IO = 1s;
-
 class Sock {
 protected:
   SOCKET m_socket;
@@ -66,25 +64,18 @@ public:
   Sock(const Sock &) = delete;
   Sock(Sock &&other);
 
-  virtual ~Sock();
+  ~Sock();
 
   Sock &operator=(const Sock &) = delete;
-  virtual Sock &operator=(Sock &&other);
+  Sock &operator=(Sock &&other);
 
-  [[nodiscard]] virtual SOCKET Get() const;
+  [[nodiscard]] SOCKET Get() const;
 
-  virtual SOCKET Release();
-  virtual void Reset();
+  SOCKET Release();
+  void Reset();
 
-  [[nodiscard]] virtual ssize_t Send(const void *data, size_t len,
-                                     int flags) const;
-  [[nodiscard]] virtual ssize_t Recv(void *buf, size_t len, int flags) const;
-  [[nodiscard]] virtual int Connect(const sockaddr *addr,
-                                    socklen_t addr_len) const;
-  [[nodiscard]] virtual std::unique_ptr<Sock> Accept(sockaddr *addr,
-                                                     socklen_t *addr_len) const;
-  [[nodiscard]] virtual int GetSockOpt(int level, int opt_name, void *opt_val,
-                                       socklen_t *opt_len) const;
+  [[nodiscard]] int Read(void *buf, size_t len) const;
+  [[nodiscard]] int Write(void *buf, size_t len) const;
 
   using Event = uint8_t;
 
@@ -92,19 +83,17 @@ public:
 
   static constexpr Event SEND = 0b10;
 
-  [[nodiscard]] virtual bool Wait(std::chrono::milliseconds timeout,
-                                  Event requested,
-                                  Event *occurred = nullptr) const;
+  [[nodiscard]] bool Wait(std::chrono::milliseconds timeout, Event requested,
+                          Event *occurred = nullptr) const;
 
-  virtual void SendComplete(const std::string &data,
-                            std::chrono::milliseconds timeout,
-                            CThreadInterrupt &interrupt &interrupt) const;
+  void SendComplete(const std::string &data,
+                    std::chrono::milliseconds timeout) const;
 
-  [[nodiscard]] virtual std::string
+  [[nodiscard]] std::string
   RecvUntilTerminator(uint8_t terminator, std::chrono::milliseconds timeout,
-                      CThreadInterrupt &interrupt, size_t max_data) const;
+                      size_t max_data) const;
 
-  [[nodiscard]] virtual bool IsConnected(std::string &errmsg) const;
+  [[nodiscard]] bool IsConnected(std::string &errmsg) const;
 };
 
 } // namespace net

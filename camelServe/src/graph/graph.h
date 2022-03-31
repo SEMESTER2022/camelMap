@@ -39,6 +39,12 @@ public:
     return this->m_search_strategy->DoQueryV(std::move(source),
                                              std::move(target));
   }
+
+  std::optional<std::pair<Vertex, Vertex>>
+  FindNearestSourceDest(Coordinate &&src_coor, Coordinate &&dst_coor) const {
+    return this->m_search_strategy->FindNearestSourceDestV(std::move(src_coor),
+                                                           std::move(dst_coor));
+  }
 };
 
 } // namespace graph
@@ -49,6 +55,17 @@ static inline std::optional<std::string>
 GraphSearchf(graph::Vertex &&source, graph::Vertex &&target) noexcept {
   if (GraphInstance().Enabled()) {
     return GraphInstance().DoSearch(std::move(source), std::move(target));
+  }
+
+  return std::nullopt;
+}
+
+static inline std::optional<std::pair<std::string>>
+GraphFindNearestSourceDestf(Coordinate &&src_coor,
+                            Coordinate &&dst_coor) noexcept {
+  if (GraphInstance().Enabled()) {
+    return GraphInstance().FindNearestSourceDest(std::move(src_coor),
+                                                 std::move(dst_coor));
   }
 
   return std::nullopt;

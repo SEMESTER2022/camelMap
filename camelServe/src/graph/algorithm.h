@@ -13,16 +13,9 @@
 namespace graph {
 class Algorithm {
 private:
-  void AddEdgeSerialize(TargetList &list, Vertex &node, Weight &weight) {
-    for (auto &[target, weight_target] : list) {
-      if (target == node && weight_target > weight) {
-        weight_target = weight;
-        return;
-      }
-    }
+  void AddEdgeSerialize(TargetList &list, Vertex &node, Weight &weight);
 
-    list.emplace_back(std::make_pair(node, weight));
-  }
+  auto FindNearestCoor(const Coordinate &coor) const;
 
 protected:
   std::string m_path_in_coor;
@@ -61,6 +54,9 @@ public:
   }
 
   bool EnabledV() { return this->m_process_status; }
+
+  std::optional<std::pair<Vertex, Vertex>>
+  FindNearestSourceDestV(Coordinate src_coor, Coordinate dst_coor) const;
 
   virtual bool InitStrategyV() = 0;
   virtual std::string DoQueryV(Vertex &&source, Vertex &&target) = 0;

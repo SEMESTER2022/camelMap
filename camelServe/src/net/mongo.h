@@ -5,9 +5,9 @@
 #include <optional>
 #include <string>
 
-#include "bsoncxx/builder/stream/array.hpp"
-#include "bsoncxx/builder/stream/document.hpp"
-#include "bsoncxx/builder/stream/helpers.hpp"
+#include "bsoncxx/builder/basic/array.hpp"
+#include "bsoncxx/builder/basic/document.hpp"
+#include "bsoncxx/builder/basic/kvp.hpp"
 #include "bsoncxx/json.hpp"
 #include "mongocxx/client.hpp"
 #include "mongocxx/instance.hpp"
@@ -18,12 +18,9 @@
 #include "fmt/format.h"
 #include "spdlog/spdlog.h"
 
-using bsoncxx::builder::stream::close_array;
-using bsoncxx::builder::stream::close_document;
-using bsoncxx::builder::stream::document;
-using bsoncxx::builder::stream::finalize;
-using bsoncxx::builder::stream::open_array;
-using bsoncxx::builder::stream::open_document;
+using bsoncxx::builder::basic::kvp;
+using bsoncxx::builder::basic::make_array;
+using bsoncxx::builder::basic::make_document;
 
 namespace net {
 
@@ -80,7 +77,7 @@ public:
 net::Mongo &MongoInstance();
 
 template <class Func, class... Args>
-static inline auto MongoSearchf(Func &&func, Args &&... args) {
+static inline auto MongoQueryf(Func &&func, Args &&... args) {
   if (MongoInstance().Enabled()) {
     return MongoInstance().DoQuery(std::move(func), std::move(args));
   }

@@ -9,7 +9,7 @@
 namespace graph {
 using Vertex = uint32_t;
 using Weight = uint64_t;
-using Coordinate = std::array<int, 2>;
+using Coordinate = std::array<float, 2>;
 using VisitedList = std::vector<bool>;
 using WeightList = std::vector<Weight>;
 using PotentialWeightList = std::vector<double>;
