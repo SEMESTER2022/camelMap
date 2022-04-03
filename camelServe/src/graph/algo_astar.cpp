@@ -2,26 +2,17 @@
 
 #include "spdlog/spdlog.h"
 
-bool graph::AlgoAstar::PreProcessBiDijkstraing() {}
-
-bool graph::AlgoAstar::InitStrategyV() {
-  bool ok = this->ReadGraphRawDataFromFile();
-  this->m_process_status = ok ? GProcessBiDijkstraStatus::PROCESSED
-                              : GProcessBiDijkstraStatus::FAILED;
-
-  spdlog::info("AStar {}\n", this->m_outgoing_edges.size());
-  return ok;
-}
+bool graph::AlgoAstar::PreProcessBiDijkstraing() { return true; }
 
 std::string graph::AlgoAstar::DoQueryV(Vertex &&source, Vertex &&target) {
   return "Response from Astar\n";
 }
 
 bool graph::AlgoAstar::InitStrategyV() {
-  bool ok = this->BiDijkstra(std::move(source), std::move(target));
+  bool ok = this->ReadGraphRawDataFromFile();
+  this->m_process_status =
+      ok ? GProcessStatus::PROCESSED : GProcessStatus::FAILED;
 
-  this->m_process_status = ok ? GProcessBiDijkstraStatus::PROCESSED
-                              : GProcessBiDijkstraStatus::FAILED;
-
+  spdlog::info("AStar {}", this->m_outgoing_edges.size());
   return ok;
 }

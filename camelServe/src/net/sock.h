@@ -30,7 +30,7 @@ namespace net {
 #   define WSAEINPROGRESS   EINPROGRESS
 #   define WSAEADDRINUSE    EADDRINUSE
 #   define WSAENOTSOCK      EBADF
-#   define INVALID_SOCKET   (SOCKET)(~0)
+#   define INVALID_SOCKET   static_cast<net::SOCKET>(~0)
 #   define SOCKET_ERROR     -1
 #else
 #   ifndef WSAEAGAIN
@@ -51,6 +51,9 @@ namespace net {
 #   define MAX_PATH         1024
 #endif
 // clang-format on
+using namespace std::chrono_literals;
+
+static constexpr auto MAX_WAIT_FOR_IO = 1s;
 
 class Sock {
 protected:
@@ -74,8 +77,8 @@ public:
   SOCKET Release();
   void Reset();
 
-  [[nodiscard]] int Read(void *buf, size_t len) const;
-  [[nodiscard]] int Write(void *buf, size_t len) const;
+  [[nodiscard]] ssize_t Recv(void *buf, size_t len, int flag) const;
+  [[nodiscard]] ssize_t Send(void *buf, size_t len, int flag) const;
 
   using Event = uint8_t;
 
@@ -100,6 +103,6 @@ public:
 
 std::string NetworkErrorString(int err);
 
-bool CloseSocket(SOCKET &hSocket);
+bool CloseSocket(net::SOCKET &hSocket);
 
 #endif // NET_SOCK_H

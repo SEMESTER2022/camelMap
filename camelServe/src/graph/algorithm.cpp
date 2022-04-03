@@ -1,10 +1,12 @@
-#include "algorithm.h"
+#include "graph/algorithm.h"
 
+#include <cmath>
 #include <fstream>
 
 #include "graph/def.h"
 #include "net/mongo.h"
 #include "net/mongo_def.h"
+
 #include "spdlog/spdlog.h"
 
 void graph::Algorithm::AddEdgeSerialize(TargetList &list, Vertex &node,
@@ -19,25 +21,6 @@ void graph::Algorithm::AddEdgeSerialize(TargetList &list, Vertex &node,
   list.emplace_back(std::make_pair(node, weight));
 }
 
-auto graph::Algorithm::FindNearestCoor(const auto &col,
-                                       const Coordinate &coor) const {
-  // clang-format off
-  return \
-    col.find_one(make_document(
-      kvp("location", make_document(
-        kvp("$near", make_document(
-          kvp("$geometry", make_document(
-            kvp("type", "Point"),
-            kvp("coordinates", make_array(
-              coor[0], coor[1]
-            ))
-          ))
-        ))
-      ))
-    ));
-  // clang-format on
-}
-
 bool graph::Algorithm::ReadFileToCoordinateList() {
   if (this->m_path_in_coor.empty()) {
     return false;
@@ -48,7 +31,8 @@ bool graph::Algorithm::ReadFileToCoordinateList() {
     return false;
   }
 
-  int nodes, lat, lng;
+  uint nodes;
+  int lat, lng;
   Vertex node;
 
   infile >> nodes;
@@ -58,7 +42,8 @@ bool graph::Algorithm::ReadFileToCoordinateList() {
     if (node > nodes) {
       return false;
     }
-    this->m_coordinates[--node] = {lng, lat};
+
+    this->m_coordinates[--node] = {lng / pow(10, 6), lat / pow(10, 6)};
   }
 
   return true;
@@ -91,42 +76,70 @@ bool graph::Algorithm::ReadFileToAdjacentList() {
   return true;
 }
 
-std::optional<std::pair<Vertex, Vertex>>
+std::tuple<bool, graph::Vertex, graph::Vertex>
 graph::Algorithm::FindNearestSourceDestV(Coordinate src_coor,
-                                         Coordinate dst_coor) const {
+                                         Coordinate dst_coor) {
+  Vertex src{}, tgt{};
+  bool ok = MongoQueryf([&](mongocxx::client& client) {
+    mongocxx::collection col =
+      client[DB_CAMEL_MAP][COL_US_NEW_YORK_COOR];
 
-  MongoQueryf([](auto client) {
-    auto col = (*client)[net::DB_CAMEL_MAP][net::COL_US_NEW_YORK_COOR];
-    Vertex src{}, tgt{};
+    static auto query = [&](auto coor) {
+      // clang-format off
+          return
+            col.find_one(make_document(
+              kvp("location", make_document(
+                kvp("$near", make_document(
+                  kvp("$geometry", make_document(
+                    kvp("type", "Point"),
+                    kvp("coordinates", make_array(
+                      coor[0], coor[1]
+                    ))
+                  ))
+                ))
+              ))
+            ));
+      // clang-format on
+    };
 
-    auto doc = this->FindNearestCoor(col, src_coor);
-    if (!doc.has_value()) {
+    auto doc = query(src_coor);
+    if (!doc) {
       spdlog::info("Not found nearest source coor");
-      return nullopt;
+      return false;
     }
 
-    auto src_it = doc.find("node_id");
-    if (src_it == doc.end()) {
+    auto view = doc->view();
+
+    auto src_it = view.find("node_id");
+    if (src_it == view.end()) {
       spdlog::error("An error occurred");
-      return nullopt;
+      return false;
     }
 
-    src = doc["node_id"].get_int64();
+    src = static_cast<Vertex>(src_it->get_int64());
 
-    doc = this->FindNearestCoor(col, dst_coor);
-    if (!doc.has_value()) {
+    doc = query(dst_coor);
+    if (!doc) {
       spdlog::error("Not found nearest dest coor");
-      return nullopt;
+      return false;
     }
 
-    auto tgt_it = doc.find("node_id");
-    if (src_it == doc.end()) {
+    view = doc->view();
+
+    auto tgt_it = view.find("node_id");
+    if (tgt_it == view.end()) {
       spdlog::error("An error occured");
-      return nullopt;
+      return false;
     }
 
-    tgt = doc["node_id"].get_int64();
+    tgt = static_cast<Vertex>(tgt_it->get_int64());
 
-    return {std::move(src), std::move(tgt)};
+    return true;
   });
+
+  if (ok == true) {
+    return {true, std::move(src), std::move(tgt)};
+  }
+
+  return {false, 0, 0};
 }

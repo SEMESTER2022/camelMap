@@ -7,9 +7,9 @@
 
 #include "graph/def.h"
 
-template <class BreakCondition, class UpdateBestDist>
+template <class BreakCondition, class UpdateBestDist, class MinPQ>
 bool graph::AlgoDijkstra::Process(AdjacentList &adj, VisitedList &visited,
-                                  WeightList &distance, MinPriorityQueue &pq,
+                                  WeightList &distance, MinPQ &pq,
                                   BreakCondition break_condition,
                                   UpdateBestDist update_best_dist) {
   if (pq.empty() || break_condition(pq.top())) {
@@ -118,14 +118,14 @@ bool graph::AlgoDijkstra::ReadGraphRawDataFromFile() {
 }
 
 bool graph::AlgoDijkstra::InitStrategyV() {
-  return std::move(this->ReadGraphRawDataFromFile());
+  bool ok = this->ReadGraphRawDataFromFile();
+  this->m_process_status =
+      ok ? GProcessStatus::PROCESSED : GProcessStatus::FAILED;
+
+  spdlog::info("Bidirection {}", this->m_outgoing_edges.size());
+  return ok;
 }
 
 std::string graph::AlgoDijkstra::DoQueryV(Vertex &&source, Vertex &&target) {
-  bool ok = this->BiDijkstra(std::move(source), std::move(target));
-
-  this->m_process_status = ok ? GProcessBiDijkstraStatus::PROCESSED
-                              : GProcessBiDijkstraStatus::FAILED;
-
-  return ok;
+  return this->BiDijkstra(std::move(source), std::move(target));
 }

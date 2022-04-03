@@ -9,7 +9,7 @@
 namespace graph {
 using Vertex = uint32_t;
 using Weight = uint64_t;
-using Coordinate = std::array<float, 2>;
+using Coordinate = std::array<double, 2>;
 using VisitedList = std::vector<bool>;
 using WeightList = std::vector<Weight>;
 using PotentialWeightList = std::vector<double>;
@@ -23,7 +23,7 @@ using MinPriorityQueue = std::priority_queue<Vertex, VertexList, WeightCompare>;
 
 const Weight kInfinite = std::numeric_limits<Weight>::max();
 
-enum GProcessBiDijkstraStatus : uint32_t {
+enum GProcessStatus : uint32_t {
   NONE = 0,
   UNPROCESS,
   ONPROCESSING,

@@ -1,8 +1,7 @@
 #ifndef NET_MONGO_H
 #define NET_MONGO_H
 
-#include <function>
-#include <optional>
+#include <memory>
 #include <string>
 
 #include "bsoncxx/builder/basic/array.hpp"
@@ -11,7 +10,7 @@
 #include "bsoncxx/json.hpp"
 #include "mongocxx/client.hpp"
 #include "mongocxx/instance.hpp"
-#include "mongocxx/stdx.hpp"
+#include "mongocxx/pool.hpp"
 #include "mongocxx/uri.hpp"
 
 #include "fmt/core.h"
@@ -26,7 +25,7 @@ namespace net {
 
 struct MongoProps {
   std::string host_name;
-  uint16_t port{0};
+  std::string port;
   std::string user_name;
   std::string password;
 
@@ -46,29 +45,29 @@ struct MongoProps {
 class Mongo {
 private:
   std::string uri{""};
-  mongocxx::instance m_instance{};
-  mongocxx::pool m_pool;
+  std::unique_ptr<mongocxx::instance> m_instance{};
+  std::unique_ptr<mongocxx::pool> m_pool;
 
 public:
   Mongo() {}
 
   bool InitMongo(MongoProps &props) {
     this->uri = props.ToUriStr();
-    bool ok = uri->empty() ? false : true;
+    bool ok = uri.empty() ? false : true;
     if (ok == false) {
       return false;
     }
 
-    this->m_pool = std::move(mongocxx::uri{this->uri});
+    this->m_pool =
+        std::make_unique<mongocxx::pool>(std::move(mongocxx::uri{this->uri}));
     return true;
   }
 
-  bool Enabled() { return this->uri->empty() ? false : true; }
+  bool Enabled() { return this->uri.empty() ? false : true; }
 
-  template <class Func, class... Args>
-  auto DoQuery(Func &&func, Args &&... args) {
-    auto client = pool.acquire();
-    return func(*client, args);
+  template <class Func> bool DoQuery(Func &&func) {
+    auto client = m_pool->acquire();
+    return func(*client);
   }
 };
 
@@ -76,13 +75,8 @@ public:
 
 net::Mongo &MongoInstance();
 
-template <class Func, class... Args>
-static inline auto MongoQueryf(Func &&func, Args &&... args) {
-  if (MongoInstance().Enabled()) {
-    return MongoInstance().DoQuery(std::move(func), std::move(args));
-  }
-
-  return std::nullopt
+template <class Func> static inline bool MongoQueryf(Func &&func) {
+  return MongoInstance().DoQuery(func);
 }
 
 #endif // NET_MONGO_H

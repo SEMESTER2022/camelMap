@@ -1,7 +1,10 @@
 #include "net/sock.h"
 
+#include <chrono>
 #include <memory>
 #include <string>
+
+#include "util/time.h"
 
 #include "fmt/core.h"
 #include "fmt/format.h"
@@ -23,7 +26,7 @@ net::Sock::Sock() : m_socket(INVALID_SOCKET) {}
 
 net::Sock::Sock(SOCKET s) : m_socket(s) {}
 
-net::Sock(Sock &&other) {
+net::Sock::Sock(net::Sock &&other) {
   m_socket = other.m_socket;
   other.m_socket = INVALID_SOCKET;
 }
@@ -39,7 +42,7 @@ net::Sock &net::Sock::operator=(Sock &&other) {
 
 net::SOCKET net::Sock::Get() const { return m_socket; }
 
-SOCKET Sock::Release() {
+net::SOCKET net::Sock::Release() {
   const SOCKET s = m_socket;
   m_socket = INVALID_SOCKET;
   return s;
@@ -47,12 +50,12 @@ SOCKET Sock::Release() {
 
 void net::Sock::Reset() { CloseSocket(m_socket); }
 
-int net::Sock::Read(void *buf, size_t len) const {
-  return read(m_sock, static_cast<char *>(buf), len);
+ssize_t net::Sock::Recv(void *buf, size_t len, int flag) const {
+  return recv(m_socket, static_cast<char *>(buf), len, flag);
 }
 
-int net::Sock::Write(void *buf, size_t len) const {
-  return write(m_sock, static_cast<char *>(buf), len);
+ssize_t net::Sock::Send(void *buf, size_t len, int flag) const {
+  return send(m_socket, static_cast<char *>(buf), len, flag);
 }
 
 bool net::Sock::Wait(std::chrono::milliseconds timeout, Sock::Event requested,
@@ -70,7 +73,7 @@ bool net::Sock::Wait(std::chrono::milliseconds timeout, Sock::Event requested,
     FD_SET(m_socket, &fdset_send);
   }
 
-  timeval timeout_struct = MillisToTimeval(timeout);
+  timeval timeout_struct = util::MillisToTimeval(timeout);
 
   if (select(m_socket + 1, &fdset_recv, &fdset_send, nullptr,
              &timeout_struct) == SOCKET_ERROR) {
@@ -86,15 +89,18 @@ bool net::Sock::Wait(std::chrono::milliseconds timeout, Sock::Event requested,
       *occurred |= SEND;
     }
   }
+
+  return true;
 }
 
 void net::Sock::SendComplete(const std::string &data,
                              std::chrono::milliseconds timeout) const {
-  const auto deadline = GetTime<std::chrono::milliseconds>() + timeout;
+  const auto deadline = util::GetTime<std::chrono::milliseconds>() + timeout;
   size_t sent{0};
 
   for (;;) {
-    const ssize_t ret{Write(data.data() + sent, data.size() - sent)};
+    ssize_t ret{Send(const_cast<char *>(data.data()) + sent, data.size() - sent,
+                     MSG_NOSIGNAL)};
     if (ret > 0) {
       sent += static_cast<size_t>(ret);
       if (sent == data.size()) {
@@ -108,7 +114,7 @@ void net::Sock::SendComplete(const std::string &data,
       }
     }
 
-    const auto now = GetTime<std::chrono::milliseconds>();
+    const auto now = util::GetTime<std::chrono::milliseconds>();
 
     if (now >= deadline) {
       throw std::runtime_error(
@@ -125,21 +131,20 @@ void net::Sock::SendComplete(const std::string &data,
 std::string net::Sock::RecvUntilTerminator(uint8_t terminator,
                                            std::chrono::milliseconds timeout,
                                            size_t max_data) const {
-  const auto deadline = GetTime<std::chrono::milliseconds>() + timeout;
+  const auto deadline = util::GetTime<std::chrono::milliseconds>() + timeout;
   std::string data;
   bool terminator_found{false};
 
   for (;;) {
     if (data.size() >= max_data) {
-      throw std::runtime_error(
-          fmt::format("Received too many bytes without a terminator ({})",
-                      data.size());)
+      throw std::runtime_error(fmt::format(
+          "Received too many bytes without a terminator ({})", data.size()));
     }
 
     char buf[512];
 
     const ssize_t peek_ret{
-        Read(buf, std::min(sizeof(buf), max_data - data.size()), MSG_PEEK)};
+        Recv(buf, std::min(sizeof(buf), max_data - data.size()), MSG_PEEK)};
 
     switch (peek_ret) {
     case -1: {
@@ -160,7 +165,7 @@ std::string net::Sock::RecvUntilTerminator(uint8_t terminator,
       const size_t try_len{terminator_found ? terminator_pos - buf + 1
                                             : static_cast<size_t>(peek_ret)};
 
-      const ssize_t read_ret{Read(buf, try_len)};
+      const ssize_t read_ret{Recv(buf, try_len, 0)};
       if (read_ret < 0 || static_cast<size_t>(read_ret) != try_len) {
         throw std::runtime_error(
             fmt::format("read() returned {} bytes on attempt to read {} bytes "
@@ -176,10 +181,10 @@ std::string net::Sock::RecvUntilTerminator(uint8_t terminator,
       }
     }
 
-    const now = GetTime<std::chrono::milliseconds>();
+    const auto now = util::GetTime<std::chrono::milliseconds>();
 
     if (now >= deadline) {
-      throw std::runtime_error(std::format(
+      throw std::runtime_error(fmt::format(
           "Receive timeout (received {} bytes without terminator before that)",
           data.size()));
     }
@@ -228,7 +233,7 @@ std::string NetworkErrorString(int err) {
 }
 #endif
 
-bool CloseSocket(SOCKET &hSocket) {
+bool CloseSocket(net::SOCKET &hSocket) {
   if (hSocket == INVALID_SOCKET)
     return false;
 #ifdef WIN32
@@ -238,8 +243,8 @@ bool CloseSocket(SOCKET &hSocket) {
 #endif
 
   if (ret) {
-    spdlog::warning("Socket close failed: {}. Error: {}\n", hSocket,
-                    NetworkErrorString(WSAGetLastError()));
+    spdlog::warn("Socket close failed: {}. Error: {}\n", hSocket,
+                 NetworkErrorString(WSAGetLastError()));
   }
 
   hSocket = INVALID_SOCKET;

@@ -20,7 +20,8 @@ private:
   std::unique_ptr<Algorithm> m_search_strategy;
 
 public:
-  bool InitStrategy() {
+  bool Init() {
+    // default bidijkstra algorithm
     assert(this->m_search_strategy != nullptr);
     return this->m_search_strategy->InitStrategyV();
   }
@@ -40,10 +41,10 @@ public:
                                              std::move(target));
   }
 
-  std::optional<std::pair<Vertex, Vertex>>
+  std::tuple<bool, Vertex, Vertex>
   FindNearestSourceDest(Coordinate &&src_coor, Coordinate &&dst_coor) const {
-    return this->m_search_strategy->FindNearestSourceDestV(std::move(src_coor),
-                                                           std::move(dst_coor));
+    return this->m_search_strategy->FindNearestSourceDestV(
+        std::forward<Coordinate>(src_coor), std::forward<Coordinate>(dst_coor));
   }
 };
 
@@ -60,15 +61,15 @@ GraphSearchf(graph::Vertex &&source, graph::Vertex &&target) noexcept {
   return std::nullopt;
 }
 
-static inline std::optional<std::pair<std::string>>
-GraphFindNearestSourceDestf(Coordinate &&src_coor,
-                            Coordinate &&dst_coor) noexcept {
+static inline std::tuple<bool, graph::Vertex, graph::Vertex>
+GraphFindNearestSourceDestf(graph::Coordinate &&src_coor,
+                            graph::Coordinate &&dst_coor) noexcept {
   if (GraphInstance().Enabled()) {
     return GraphInstance().FindNearestSourceDest(std::move(src_coor),
                                                  std::move(dst_coor));
   }
 
-  return std::nullopt;
+  return {false, 0, 0};
 }
 
 #endif // GRAPH_GRAPH_H

@@ -1,7 +1,6 @@
 #ifndef GRAPH_ALGO_H
 #define GRAPH_ALGO_H
 
-#include <optional>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
@@ -14,8 +13,6 @@ namespace graph {
 class Algorithm {
 private:
   void AddEdgeSerialize(TargetList &list, Vertex &node, Weight &weight);
-
-  auto FindNearestCoor(const Coordinate &coor) const;
 
 protected:
   std::string m_path_in_coor;
@@ -55,8 +52,8 @@ public:
 
   bool EnabledV() { return this->m_process_status; }
 
-  std::optional<std::pair<Vertex, Vertex>>
-  FindNearestSourceDestV(Coordinate src_coor, Coordinate dst_coor) const;
+  std::tuple<bool, Vertex, Vertex> FindNearestSourceDestV(Coordinate src_coor,
+                                                          Coordinate dst_coor);
 
   virtual bool InitStrategyV() = 0;
   virtual std::string DoQueryV(Vertex &&source, Vertex &&target) = 0;
