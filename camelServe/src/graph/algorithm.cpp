@@ -31,7 +31,7 @@ bool graph::Algorithm::ReadFileToCoordinateList() {
     return false;
   }
 
-  uint nodes;
+  uint32_t nodes;
   int lat, lng;
   Vertex node;
 

@@ -1,56 +1,10 @@
 #ifndef NET_SOCK_H
 #define NET_SOCK_H
 
-#include <chrono>
-#include <memory>
-#include <string>
-
-#ifdef WIN32
-#include <winsock2.h>
-#else
-#include <fcntl.h>
-#include <sys/socket.h>
-#include <sys/un.h>
-#include <unistd.h>
-#endif
+#include "util/compat.h"
 
 namespace net {
 
-// clang-format off
-#ifndef WIN32
-    typedef unsigned int SOCKET;
-#   include <errno.h>
-#   define WSAGetLastError() errno
-#   define WSAEINVAL        EINVAL
-#   define WSAEALREADY      EALREADY
-#   define WSAEWOULDBLOCK   EWOULDBLOCK
-#   define WSAEAGAIN        EAGAIN
-#   define WSAEMSGSIZE      EMSGSIZE
-#   define WSAEINTR         EINTR
-#   define WSAEINPROGRESS   EINPROGRESS
-#   define WSAEADDRINUSE    EADDRINUSE
-#   define WSAENOTSOCK      EBADF
-#   define INVALID_SOCKET   static_cast<net::SOCKET>(~0)
-#   define SOCKET_ERROR     -1
-#else
-#   ifndef WSAEAGAIN
-#       ifdef EAGAIN
-#           define WSAEAGAIN EAGAIN
-#       else
-#           define WSAEAGAIN WSAEWOULDBLOCK
-#       endif
-#   endif
-#endif
-
-#ifdef WIN32
-#   ifndef S_IRUSR
-#       define S_IRUSR      0400
-#       define S_IWUSR      0200
-#   endif
-#else
-#   define MAX_PATH         1024
-#endif
-// clang-format on
 using namespace std::chrono_literals;
 
 static constexpr auto MAX_WAIT_FOR_IO = 1s;
@@ -103,6 +57,6 @@ public:
 
 std::string NetworkErrorString(int err);
 
-bool CloseSocket(net::SOCKET &hSocket);
+bool CloseSocket(SOCKET &hSocket);
 
 #endif // NET_SOCK_H

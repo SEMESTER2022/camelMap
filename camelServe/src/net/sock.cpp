@@ -40,9 +40,9 @@ net::Sock &net::Sock::operator=(Sock &&other) {
   return *this;
 }
 
-net::SOCKET net::Sock::Get() const { return m_socket; }
+SOCKET net::Sock::Get() const { return m_socket; }
 
-net::SOCKET net::Sock::Release() {
+SOCKET net::Sock::Release() {
   const SOCKET s = m_socket;
   m_socket = INVALID_SOCKET;
   return s;
@@ -233,7 +233,7 @@ std::string NetworkErrorString(int err) {
 }
 #endif
 
-bool CloseSocket(net::SOCKET &hSocket) {
+bool CloseSocket(SOCKET &hSocket) {
   if (hSocket == INVALID_SOCKET)
     return false;
 #ifdef WIN32

@@ -3,6 +3,8 @@
 
 #include <chrono>
 
+#include "util/compat.h"
+
 namespace util {
 int64_t GetTime();
 
