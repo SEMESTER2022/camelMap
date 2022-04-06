@@ -6,7 +6,7 @@
     "cmake.configureSettings": {
         "CMAKE_INSTALL_PREFIX": "../../camelMap.image/camelServe",
         "BUILD_SHARED_LIBS": "ON",
-        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_BUILD_TYPE": "Release",
         "CS_PEDANTIC": "ON",
         "CS_WERROR": "ON",
     },

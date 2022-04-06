@@ -4,6 +4,8 @@
 #include <memory>
 #include <string>
 
+#include "config.h"
+
 #include "bsoncxx/builder/basic/array.hpp"
 #include "bsoncxx/builder/basic/document.hpp"
 #include "bsoncxx/builder/basic/kvp.hpp"
@@ -44,14 +46,17 @@ struct MongoProps {
 
 class Mongo {
 private:
-  std::string uri{""};
+  std::string uri;
   std::unique_ptr<mongocxx::instance> m_instance{};
   std::unique_ptr<mongocxx::pool> m_pool;
 
 public:
   Mongo() {}
 
-  bool InitMongo(MongoProps &props) {
+  bool Init() {
+    MongoProps props{CS_MONGO_HOST_NAME, CS_MONGO_PORT, CS_MONGO_USER_NAME,
+                     CS_MONGO_PASSWORD};
+
     this->uri = props.ToUriStr();
     bool ok = uri.empty() ? false : true;
     if (ok == false) {
@@ -62,8 +67,6 @@ public:
         std::make_unique<mongocxx::pool>(std::move(mongocxx::uri{this->uri}));
     return true;
   }
-
-  bool Enabled() { return this->uri.empty() ? false : true; }
 
   template <class Func> bool DoQuery(Func &&func) {
     auto client = m_pool->acquire();

@@ -44,6 +44,10 @@ template <typename T> T util::GetTime() {
       mocktime.count() ? mocktime : std::chrono::microseconds{GetTimeMicros()});
 }
 
+template std::chrono::seconds util::GetTime();
+template std::chrono::milliseconds util::GetTime();
+template std::chrono::microseconds util::GetTime();
+
 struct timeval util::MillisToTimeval(int64_t nTimeout) {
   struct timeval timeout;
   timeout.tv_sec = nTimeout / 1000;

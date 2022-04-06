@@ -26,9 +26,11 @@ private:
 public:
   UnixServer();
 
-  ~UnixServer() = default;
+  ~UnixServer();
 
-  [[nodiscard]] bool Listen();
+  [[nodiscard]] bool Init();
+
+  [[nodiscard]] bool Stop();
 
   [[nodiscard]] std::unique_ptr<net::Sock> Accept() const;
 

@@ -12,7 +12,7 @@
 
 net::UnixServer::UnixServer() {}
 
-bool net::UnixServer::Listen() {
+bool net::UnixServer::Init() {
   int sock_ret = socket(AF_UNIX, SOCK_SEQPACKET, 0);
   if (sock_ret == -1) {
     spdlog::info("Connection socket failed");
@@ -20,17 +20,16 @@ bool net::UnixServer::Listen() {
   }
 
   m_sock = std::make_unique<Sock>(static_cast<unsigned int>(sock_ret));
-
   memset(&m_addr, 0, sizeof(m_addr));
   m_addr.sun_family = AF_UNIX;
 
   strncpy(m_addr.sun_path, SOCK_NAME, sizeof(m_addr.sun_path) - 1);
 
-  int ret =
-      bind(m_sock->Get(), reinterpret_cast<const struct sockaddr *>(&m_addr),
-           sizeof(m_addr));
+  int ret = bind(sock_ret, reinterpret_cast<const struct sockaddr *>(&m_addr),
+                 sizeof(m_addr));
   if (ret == -1) {
-    spdlog::info("Bind socket failed");
+    spdlog::error("Bind socket failed {}",
+                  NetworkErrorString(WSAGetLastError()));
     return false;
   }
 
@@ -41,6 +40,18 @@ bool net::UnixServer::Listen() {
   }
 
   return true;
+}
+
+net::UnixServer::~UnixServer() {
+  SOCKET sock = this->m_sock->Get();
+  bool ok = CloseSocket(sock);
+  if (!ok) {
+    spdlog::error("Close connection socket failed");
+    return;
+  }
+
+  unlink(SOCK_NAME);
+  spdlog::info("Shut down unix server");
 }
 
 std::unique_ptr<net::Sock> net::UnixServer::Accept() const {

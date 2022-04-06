@@ -103,10 +103,19 @@ include(ProvideDependencies)
 file(GLOB CS_SOURCES_CXX RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} src/*/*.cpp)
 list(SORT CS_SOURCES_CXX)
 
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+    set (CS_DATA_DIR "${CMAKE_CURRENT_SOURCE_DIR}/share")
+else()
+    set (CS_DATA_DIR "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_DATADIR}")
+endif()
+
 add_library(cs ${CS_SOURCES_CXX})
 target_include_directories(cs PUBLIC
                 "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>"
                 "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>")
+
+target_include_directories(cs PUBLIC "$<BUILD_INTERFACE:${CMAKE_BINARY_DIR}>")
+
 if (CS_PEDANTIC)
     target_compile_options(cs PUBLIC ${CS_PEDANTIC_FLAGS})
 endif()
@@ -126,10 +135,17 @@ target_link_libraries(cs PUBLIC LibMongoCXX)
 add_executable(camelServe src/main.cpp)
 target_link_libraries(camelServe PRIVATE cs)
 
+# import secret configurations
+include(ImportConfig)
+configure_file(config.h.in config.h)
+
 install(DIRECTORY src/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
         PATTERN "*.cpp" EXCLUDE)
 
+install(DIRECTORY share/ DESTINATION ${CMAKE_INSTALL_DATADIR})
+
 install(TARGETS cs
+        PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})

@@ -1,52 +1,65 @@
-#include "fmt/core.h"
-
-#include "graph/algo_astar.h"
-#include "graph/algo_dijkstra.h"
-#include "graph/graph.h"
-
 #include <memory>
+#include <stdlib.h>
 
+#include "graph/graph.h"
+#include "net/mongo.h"
+#include "net/unix_server.h"
+
+#include "fmt/core.h"
 #include "spdlog/spdlog.h"
 
-int main() {
-  // graph::AlgoDijkstra algo = graph::AlgoDijkstra{};
-  // algo.SetInFile("/home/balebom/github/teamwork/camelMap/camelServe/data/"
-  //                "USA-road-d.NY.gr",
-  //                "/home/balebom/github/teamwork/camelMap/camelServe/data/"
-  //                "USA-road-d.NY.gr",
-  //                "/home/balebom/github/teamwork/camelMap/camelServe/data/"
-  //                "USA-road-d.NY.gr");
+enum APP_SERVICE : uint32_t {
+  GRAPH = 0,
+  MONGO,
+  UNIX_SERVER,
+};
 
-  // GraphInstance().AssignRuntimeStrategy(
-  //     std::make_unique<graph::AlgoDijkstra>(std::move(algo)));
-  // bool ok = GraphInstance().InitStrategy();
-  // if (ok == false) {
-  //   spdlog::info("Init graph failed");
-  //   return 0;
-  // }
-  // spdlog::info("Result from 12 to 308 is {}",
-  //              GraphInstance().DoSearch(12, 308));
+bool init_graph() {
+  // TODO
+  // set strategy to astar
+  return GraphInstance().Init();
+}
 
-  // graph::AlgoAstar algo_astar = graph::AlgoAstar{};
-  // algo_astar.SetInFile("/home/balebom/github/teamwork/camelMap/camelServe/data/"
-  //                      "USA-road-d.NY.gr",
-  //                      "/home/balebom/github/teamwork/camelMap/camelServe/data/"
-  //                      "USA-road-d.NY.gr",
-  //                      "/home/balebom/github/teamwork/camelMap/camelServe/data/"
-  //                      "USA-road-d.NY.gr");
+bool init_mongo() {
+  // TODO
+  return MongoInstance().Init();
+}
 
-  // GraphInstance().AssignRuntimeStrategy(
-  //     std::make_unique<graph::AlgoAstar>(std::move(algo_astar)));
+bool init_unix_server() {
+  // TODO
+  return UnixServerInstance().Init();
+}
 
-  // ok = GraphInstance().InitStrategy();
-  // if (ok == false) {
-  //   spdlog::info("Init graph failed again");
-  //   return 0;
-  // }
+int main(int argc, char *argv[]) {
+  spdlog::info("Init application ....");
+  bool ok = false;
 
-  // spdlog::info("Result from 12 to 28 is {}", GraphInstance().DoSearch(12,
-  // 28));
+  spdlog::info("Start graph ... ");
+  ok = init_graph();
+  if (ok == false) {
+    spdlog::error("Init graph failed.");
+    return EXIT_FAILURE;
+  }
+  spdlog::info("Start graph ok.");
+  spdlog::info("Start mongo ... ");
 
-  // spdlog::info("Hehe {}", algo.DoQueryV(17, 32));
-  return 0;
+  ok = init_mongo();
+  if (ok == false) {
+    spdlog::error("Init mongo failed.");
+    return EXIT_FAILURE;
+  }
+  spdlog::info("Start mongo ok.");
+  spdlog::info("Start unix_server ...");
+
+  ok = init_unix_server();
+  if (ok == false) {
+    spdlog::error("Init unix_server failed");
+    return EXIT_FAILURE;
+  }
+  spdlog::info("Start unix server ok.");
+
+  while (true) {
+  }
+
+  return EXIT_SUCCESS;
 }

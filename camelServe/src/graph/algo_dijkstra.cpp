@@ -122,7 +122,8 @@ bool graph::AlgoDijkstra::InitStrategyV() {
   this->m_process_status =
       ok ? GProcessStatus::PROCESSED : GProcessStatus::FAILED;
 
-  spdlog::info("Bidirection {}", this->m_outgoing_edges.size());
+  spdlog::info("Init strategy dijkstra success with number of vertexs: {}",
+               this->m_outgoing_edges.size());
   return ok;
 }
 
