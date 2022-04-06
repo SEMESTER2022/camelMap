@@ -131,6 +131,12 @@ target_link_libraries(cs PUBLIC LibFmt)
 target_link_libraries(cs PUBLIC LibSpdLog)
 target_link_libraries(cs PUBLIC LibMongoCXX)
 
+if (WIN32)
+    find_library(WSOCK32_LIBRARY wsock32)
+    find_library(WS2_32_LIBRARY ws2_32)
+    target_link_libraries(cs PUBLIC wsock32 ws2_32)
+endif()
+
 # main program
 add_executable(camelServe src/main.cpp)
 target_link_libraries(camelServe PRIVATE cs)
