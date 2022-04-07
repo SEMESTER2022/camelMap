@@ -2,7 +2,7 @@ import socket
 import sys
 import json
 
-DEFAULT_SOCKET = '/tmp/server.socket'
+DEFAULT_SOCKET = '/tmp/camel.sock'
 
 class QueryResponse():
     def __init__(self, error_code = 0, msg = '', payload_data = '{}') -> None:
@@ -17,12 +17,13 @@ class QueryResponse():
         return {'error_code': self.error_code, 'msg': self.msg, 'payload_data': self.payload_data}
 
 class UnixClient():
-    def __init__(self, source_lng, source_lat, target_lng, target_lat) -> None:
-        data = json.dumps({"slng": source_lng, "slat": source_lat, "tlng": target_lng, "tlat": target_lat})
-        self.query = len(data).to_bytes(4, sys.byteorder) + data.encode()
+    def __init__(self, source_lng, source_lat, target_lng, target_lat):
+        data = str(source_lng) + ";" + str(source_lat) + ";" + str(target_lng) + ";" + str(target_lat) + ";\n"
+        self.query = data.encode()
         self.response = QueryResponse()
 
     def DoRequest(self):
+        print(f"{self.query}")
         sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
         try:
             sock.connect(DEFAULT_SOCKET)

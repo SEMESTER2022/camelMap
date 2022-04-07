@@ -11,7 +11,7 @@
 #include "net/sock.h"
 
 namespace net {
-#define SOCK_NAME "~/camelFiles/camel.sock"
+#define SOCK_NAME "/tmp/camel.sock"
 static constexpr uint32_t BACKLOG_SIZE = 50;
 
 static constexpr size_t MAX_MSG_SIZE{65536};
@@ -20,7 +20,7 @@ class UnixServer {
 private:
   struct sockaddr_un m_addr;
 
-  std::unique_ptr<Sock> m_sock;
+  std::shared_ptr<Sock> m_sock;
   std::mutex m_mutex;
 
 public:
@@ -30,12 +30,11 @@ public:
 
   [[nodiscard]] bool Init();
 
-  [[nodiscard]] bool Stop();
+  [[nodiscard]] bool Shutdown();
 
-  [[nodiscard]] std::unique_ptr<net::Sock> Accept() const;
+  [[nodiscard]] std::shared_ptr<net::Sock> Accept() const;
 
-  [[nodiscard]] bool
-  HandleRequestAndSendReply(std::unique_ptr<Sock> sock) const;
+  [[nodiscard]] bool HandleRequestAndSendReply(std::shared_ptr<Sock> sock);
 };
 } // namespace net
 

@@ -30,6 +30,8 @@ public:
     return this->m_search_strategy->InitStrategyV();
   }
 
+  bool Shutdown() { return true; }
+
   bool Enabled() const {
     assert(this->m_search_strategy != nullptr);
     return this->m_search_strategy->EnabledV();

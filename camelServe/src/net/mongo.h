@@ -63,14 +63,24 @@ public:
       return false;
     }
 
+    spdlog::info("Connection string: {}", this->uri);
+
     this->m_pool =
         std::make_unique<mongocxx::pool>(std::move(mongocxx::uri{this->uri}));
     return true;
   }
 
+  bool Shutdown() { return true; }
+
   template <class Func> bool DoQuery(Func &&func) {
-    auto client = m_pool->acquire();
-    return func(*client);
+    try {
+      auto client = m_pool->acquire();
+      return func(*client);
+    }
+    catch (...) {
+      spdlog::error("Mongo query failed!");
+      return false;
+    }
   }
 };
 

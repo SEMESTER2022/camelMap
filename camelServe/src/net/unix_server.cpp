@@ -13,13 +13,13 @@
 net::UnixServer::UnixServer() {}
 
 bool net::UnixServer::Init() {
-  int sock_ret = socket(AF_UNIX, SOCK_SEQPACKET, 0);
+  int sock_ret = socket(AF_UNIX, SOCK_STREAM, 0);
   if (sock_ret == -1) {
     spdlog::info("Connection socket failed");
     return false;
   }
 
-  m_sock = std::make_unique<Sock>(static_cast<unsigned int>(sock_ret));
+  m_sock = std::make_shared<Sock>(static_cast<unsigned int>(sock_ret));
   memset(&m_addr, 0, sizeof(m_addr));
   m_addr.sun_family = AF_UNIX;
 
@@ -42,19 +42,21 @@ bool net::UnixServer::Init() {
   return true;
 }
 
-net::UnixServer::~UnixServer() {
+bool net::UnixServer::Shutdown() {
   SOCKET sock = this->m_sock->Get();
   bool ok = CloseSocket(sock);
   if (!ok) {
     spdlog::error("Close connection socket failed");
-    return;
+    return false;
   }
 
   unlink(SOCK_NAME);
-  spdlog::info("Shut down unix server");
+  return true;
 }
 
-std::unique_ptr<net::Sock> net::UnixServer::Accept() const {
+net::UnixServer::~UnixServer() {}
+
+std::shared_ptr<net::Sock> net::UnixServer::Accept() const {
   if (m_sock == nullptr) {
     spdlog::info("m_sock is emptied");
     return nullptr;
@@ -66,11 +68,11 @@ std::unique_ptr<net::Sock> net::UnixServer::Accept() const {
   static constexpr auto ERR = SOCKET_ERROR;
 #endif
 
-  std::unique_ptr<Sock> sock;
+  std::shared_ptr<Sock> sock;
   int socket = accept(m_sock->Get(), nullptr, nullptr);
   if (socket != ERR) {
     try {
-      sock = std::make_unique<Sock>(socket);
+      sock = std::make_shared<Sock>(socket);
     } catch (const std::exception &) {
 #ifdef WIN32
       closesocket(socket);
@@ -98,13 +100,12 @@ struct Reply {
   }
 };
 
-bool net::UnixServer::HandleRequestAndSendReply(
-    std::unique_ptr<Sock> sock) const {
+bool net::UnixServer::HandleRequestAndSendReply(std::shared_ptr<Sock> sock) {
+  spdlog::info("start handler");
   std::string query{""};
   Reply reply{};
   auto send_response = [&]() {
     try {
-      spdlog::info("Response: {}", query);
       sock->SendComplete(std::move(query), MAX_WAIT_FOR_IO);
       return true;
     } catch (const std::runtime_error &e) {

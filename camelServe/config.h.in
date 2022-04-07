@@ -14,6 +14,8 @@
 #define CS_MONGO_PORT      "${CS_MONGO_PORT}"
 #define CS_MONGO_USER_NAME "${CS_MONGO_USER_NAME}"
 #define CS_MONGO_PASSWORD  "${CS_MONGO_PASSWORD}"
+
+#define CS_SERVICE_THREAD_POOL_SIZE         ${CS_SERVICE_THREAD_POOL_SIZE}
 //clang-format on
 
 #endif // CONFIG_H

@@ -4,10 +4,13 @@
 #include "cs/core.h"
 
 int main(int argc, char *argv[]) {
-  bool ok = cs::AppInit();
+  bool ok = cs::init();
   if (ok == true) {
-    spdlog::info("OK");
+    spdlog::info("Start application sucessfully!");
   }
 
+  cs::mainloop();
+
+  cs::shutdown();
   return EXIT_SUCCESS;
 }

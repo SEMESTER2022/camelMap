@@ -5,18 +5,20 @@
 #include <memory>
 #include <string>
 
+// clang-format off
 #ifdef WIN32
 #	ifndef NOMINMAX
 #		define NOMINMAX
 #	endif
-#include <winsock2.h>
-#include <afunix.h>
+#   include <winsock2.h>
+#   include <afunix.h>
 #else
-#include <fcntl.h>
-#include <sys/socket.h>
-#include <sys/un.h>
-#include <unistd.h>
+#   include <fcntl.h>
+#   include <sys/socket.h>
+#   include <sys/un.h>
+#   include <unistd.h>
 #endif
+// clang-format on
 
 // clang-format off
 #ifndef WIN32
