@@ -94,8 +94,7 @@ struct Reply {
                   {{
                     "success": {},
                     "msg": {}
-                  }}
-                )",
+                  }})",
                        success, msg);
   }
 };
@@ -106,7 +105,8 @@ bool net::UnixServer::HandleRequestAndSendReply(std::shared_ptr<Sock> sock) {
   Reply reply{};
   auto send_response = [&]() {
     try {
-      sock->SendComplete(std::move(query), MAX_WAIT_FOR_IO);
+      sock->SendComplete(std::move(reply.ToStr()), MAX_WAIT_FOR_IO);
+      spdlog::info("reply: {}", reply.ToStr());
       return true;
     } catch (const std::runtime_error &e) {
       spdlog::error("{}", NetworkErrorString(WSAGetLastError()));
@@ -116,6 +116,7 @@ bool net::UnixServer::HandleRequestAndSendReply(std::shared_ptr<Sock> sock) {
 
   try {
     query = sock->RecvUntilTerminator('\n', MAX_WAIT_FOR_IO, MAX_MSG_SIZE);
+    spdlog::info("Server receive query: {}", query);
   } catch (const std::runtime_error &e) {
     spdlog::error("Receive data: {}", e.what());
     reply = Reply{false, "Some thing went wrong, please try later"};

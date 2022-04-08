@@ -76,7 +76,7 @@ bool shutdownf() {
 }
 
 bool cs::init() {
-  spdlog::info("hello from share lib");
+  spdlog::set_pattern("[%H:%M:%S %z] [%^-%L-%$] [thread %t] %v");
 
   spdlog::info("Init application ....");
   bool ok = false;
@@ -150,19 +150,20 @@ void cs::mainloop() {
       }
     }
 
-    std::future<bool> future_ret = request_pool.enqueue([data_sock = std::move(data_sock)] {
-      spdlog::info("Handle request ... for socket {} ", data_sock->Get());
-      bool result = UnixServerInstance().HandleRequestAndSendReply(data_sock);
-      return result;
-    });
+    std::future<bool> future_ret =
+        request_pool.enqueue([data_sock = std::move(data_sock)] {
+          spdlog::info("Handle request ... for socket {} ", data_sock->Get());
+          bool result =
+              UnixServerInstance().HandleRequestAndSendReply(data_sock);
+          return result;
+        });
 
     if (!future_ret.get()) {
-        spdlog::info("send data failed");
-      } else {
-        spdlog::info("Success handle for request");
-      }
+      spdlog::info("send data failed");
+    } else {
+      spdlog::info("Success handle for request");
+    }
   }
-
   return;
 }
 
@@ -173,6 +174,5 @@ void cs::shutdown() {
   } else {
     spdlog::info("Shutdown service sucessfully! Good bye.");
   }
-
   return;
 }

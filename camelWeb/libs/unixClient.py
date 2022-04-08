@@ -1,8 +1,12 @@
+from os import terminal_size
 import socket
 import sys
 import json
 
+from sklearn.feature_selection import SelectFdr
+
 DEFAULT_SOCKET = '/tmp/camel.sock'
+MAX_MSG_SIZE=65536
 
 class QueryResponse():
     def __init__(self, error_code = 0, msg = '', payload_data = '{}') -> None:
@@ -23,7 +27,6 @@ class UnixClient():
         self.response = QueryResponse()
 
     def DoRequest(self):
-        print(f"{self.query}")
         sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
         try:
             sock.connect(DEFAULT_SOCKET)
@@ -35,17 +38,19 @@ class UnixClient():
         try:
             print(self.query)
             sock.sendall(self.query)
+            print('start receive')
+            data = ""
+            while True:
+                buf = sock.recv(1024)
 
-            recv_size = sock.recv(8)
-            exp_recv = int.from_bytes(recv_size, sys.byteorder)
+                if len(buf) <= 0:
+                    break
+                else:
+                    data += buf.decode()
 
-            total_recv = 0
-            payload = ''
-            while total_recv != exp_recv:
-                payload += sock.recv(exp_recv - total_recv).decode('utf-8')
-                total_recv += len(payload)
-
-            self.response.set_response(0, '', payload)
+            print(f"here {data}")
+            self.response.set_response(0, '', data)
         finally:
             sock.close()
+
         return self.response.dump()

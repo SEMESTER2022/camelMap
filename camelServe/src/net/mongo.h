@@ -76,8 +76,7 @@ public:
     try {
       auto client = m_pool->acquire();
       return func(*client);
-    }
-    catch (...) {
+    } catch (...) {
       spdlog::error("Mongo query failed!");
       return false;
     }

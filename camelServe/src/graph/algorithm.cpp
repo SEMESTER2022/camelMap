@@ -80,45 +80,43 @@ std::tuple<bool, graph::Vertex, graph::Vertex>
 graph::Algorithm::FindNearestSourceDestV(Coordinate src_coor,
                                          Coordinate dst_coor) {
   Vertex src{}, tgt{};
-  bool ok = MongoQueryf([&](mongocxx::client& client) {
-    mongocxx::collection col =
-      client[DB_CAMEL_MAP][COL_US_NEW_YORK_COOR];
+  bool ok = MongoQueryf([&](mongocxx::client &client) {
+    mongocxx::collection col = client[DB_CAMEL_MAP][COL_US_NEW_YORK_COOR];
+    mongocxx::stdx::optional<bsoncxx::document::value> doc = col.find_one(make_document(kvp(
+        "location",
+        make_document(kvp(
+            "$near",
+            make_document(kvp(
+                "$geometry",
+                make_document(kvp("type", "Point"),
+                              kvp("coordinates",
+                                  make_array(src_coor[0], src_coor[1]))))))))));
 
-    static auto query = [&](auto coor) {
-      // clang-format off
-          return
-            col.find_one(make_document(
-              kvp("location", make_document(
-                kvp("$near", make_document(
-                  kvp("$geometry", make_document(
-                    kvp("type", "Point"),
-                    kvp("coordinates", make_array(
-                      coor[0], coor[1]
-                    ))
-                  ))
-                ))
-              ))
-            ));
-      // clang-format on
-    };
-
-    auto doc = query(src_coor);
     if (!doc) {
       spdlog::info("Not found nearest source coor");
       return false;
     }
 
-    auto view = doc->view();
-
+    bsoncxx::document::view view = doc->view();
     auto src_it = view.find("node_id");
     if (src_it == view.end()) {
       spdlog::error("An error occurred");
       return false;
     }
 
-    src = static_cast<Vertex>(src_it->get_int64());
+    spdlog::info("values {}", src_it->get_int32().value);
+    src = static_cast<Vertex>(src_it->get_int32().value);
 
-    doc = query(dst_coor);
+    doc = col.find_one(make_document(kvp(
+        "location",
+        make_document(kvp(
+            "$near",
+            make_document(kvp(
+                "$geometry",
+                make_document(kvp("type", "Point"),
+                              kvp("coordinates",
+                                  make_array(dst_coor[0], dst_coor[1]))))))))));
+
     if (!doc) {
       spdlog::error("Not found nearest dest coor");
       return false;
@@ -132,7 +130,7 @@ graph::Algorithm::FindNearestSourceDestV(Coordinate src_coor,
       return false;
     }
 
-    tgt = static_cast<Vertex>(tgt_it->get_int64());
+    tgt = static_cast<Vertex>(tgt_it->get_int32().value);
 
     return true;
   });

@@ -114,21 +114,27 @@
 
             if (error_code == 0) {
                 const payload = JSON.parse(payload_data);
-                const coors = payload.coors;
+                if (payload.hasOwnProperty("success") && payload.hasOwnProperty("msg")) {
+                    if (payload.success == false) {
+                        alert('coordinate out of bound!');
+                        return;
+                    }
+                    const coors = payload.msg.shortest_coordinate;
 
-                var source = [coors[0][1], coors[0][0]];
-                var target = [coors[coors.length - 1][1], coors[coors.length - 1][0]];
+                    var source = [coors[0][1], coors[0][0]];
+                    var target = [coors[coors.length - 1][1], coors[coors.length - 1][0]];
 
-                var lines = [{
-                    "type": "LineString",
-                    "coordinates": coors
-                }];
+                    var lines = [{
+                        "type": "LineString",
+                        "coordinates": coors
+                    }];
 
-                layerGroup.clearLayers();
+                    layerGroup.clearLayers();
 
-                L.geoJSON(lines).addTo(layerGroup);
-                L.marker(source, { icon: customIcon }).addTo(layerGroup);
-                L.marker(target, { icon: customIcon }).addTo(layerGroup);
+                    L.geoJSON(lines).addTo(layerGroup);
+                    L.marker(source, { icon: customIcon }).addTo(layerGroup);
+                    L.marker(target, { icon: customIcon }).addTo(layerGroup);
+                }
             }
             else {
                 alert('coordinate out of bound!');

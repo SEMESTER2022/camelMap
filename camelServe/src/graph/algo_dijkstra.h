@@ -11,9 +11,10 @@ namespace graph {
 class AlgoDijkstra : public Algorithm {
 private:
 protected:
-  template <class BreakCondition, class UpdateBestDist, class MinPQ>
+  template <class BreakCondition, class UpdateBestDist, class MinPQ,
+            class BackTrace>
   bool Process(AdjacentList &, VisitedList &, WeightList &, MinPQ &,
-               BreakCondition, UpdateBestDist);
+               BackTrace &, BreakCondition, UpdateBestDist);
 
   std::string Dijkstra(Vertex &&, Vertex &&);
   std::string BiDijkstra(Vertex &&, Vertex &&);
