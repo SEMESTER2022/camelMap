@@ -20,75 +20,87 @@
       rel="stylesheet"
       href="{% static 'appMap/css/leaflet/leaflet.css' %}"
     />
+    <link
+      href="https://unpkg.com/boxicons@2.1.1/css/boxicons.min.css"
+      rel="stylesheet"
+    />
     <link rel="stylesheet" href="{% static 'appMap/css/main.css' %}" />
-
     <script src="{% static 'appMap/js/leaflet/leaflet.js' %}"></script>
   </head>
 
   <body style="margin: 0%">
-    <nav id="navbarSearch" class="navbar navbar-light bg-light fixed-top">
-      <div class="container-fluid">
-        <button
-          class="navbar-toggler"
-          type="button"
-          data-bs-toggle="offcanvas"
-          data-bs-target="#offcanvasNavbar"
-          aria-controls="offcanvasNavbar"
-        >
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <a class="navbar-brand" href="#">Camel Map</a>
-        <div
-          class="offcanvas offcanvas-start"
-          tabindex="-1"
-          id="offcanvasNavbar"
-          aria-labelledby="offcanvasNavbarLabel"
-        >
-          <div class="offcanvas-header">
-            <h5 class="offcanvas-title" id="offcanvasNavbarLabel">
-              Find your path
-            </h5>
+    <nav class="sidebar close">
+      <header>
+        <div class="image-text">
+          <span class="image">
+            <!--<img src="logo.png" alt="">-->
+            <i class="bx bx-search icon bx-md iconClick"></i>
+          </span>
+
+          <div class="text logo-text">
+            <span class="name">camelMap</span>
+            <span class="profession">ENTER YOUR PATH</span>
+          </div>
+        </div>
+
+        <i class="bx bx-chevron-right toggle"></i>
+      </header>
+
+      <div class="menu-bar">
+        <div class="menu">
+          <li class="search-box">
+            {% comment %} <i class="bx bx-search icon"></i> {% endcomment %}
+            <input
+              id="s"
+              name="s"
+              class="form-control"
+              type="search"
+              placeholder="From..."
+            />
+          </li>
+
+          <li class="search-box openBoxTo">
+            {% comment %} <i class="bx bx-search icon"></i> {% endcomment %}
+            <input
+              id="t"
+              name="t"
+              class="form-control"
+              type="search"
+              placeholder="To..."
+            />
+          </li>
+
+          <li>
             <button
-              type="button"
-              class="btn-close text-reset"
-              data-bs-dismiss="offcanvas"
-              aria-label="Close"
-            ></button>
-          </div>
-          <div class="offcanvas-body">
-            <div>
-              <div class="row mb-3">
-                <div class="col">
-                  <input
-                    id="s"
-                    name="s"
-                    class="form-control"
-                    type="search"
-                    placeholder="From"
-                  />
-                </div>
-              </div>
-              <div class="row mb-2">
-                <div class="col">
-                  <input
-                    id="t"
-                    name="t"
-                    class="form-control"
-                    type="search"
-                    placeholder="To"
-                  />
-                </div>
-              </div>
-              <div class="row">
-                <div class="col-9"></div>
-                <div class="col-3">
-                  <button id="btnDoQuery" class="btn btn-outline-success">
-                    Search
-                  </button>
-                </div>
-              </div>
+              id="btnDoQuery"
+              class="btn btn-outline-success buttonSearch"
+            >
+              Search
+            </button>
+          </li>
+
+          <li />
+        </div>
+
+        <div class="bottom-content">
+          <li class="">
+            <a href="#">
+              <i class="bx bx-log-out icon"></i>
+              <span class="text nav-text">Logout</span>
+            </a>
+          </li>
+
+          <li class="mode">
+            <div class="sun-moon">
+              <i class="bx bx-moon icon moon"></i>
+              <i class="bx bx-sun icon sun"></i>
             </div>
-          </div>
+            <span class="mode-text text">Dark mode</span>
+
+            <div class="toggle-switch">
+              <span class="switch"></span>
+            </div>
+          </li>
         </div>
       </div>
     </nav>
@@ -98,6 +110,41 @@
     <script src="{% static 'appMap/js/main.js' %}"></script>
 
     <script>
+      const body = document.querySelector("body"),
+        sidebar = body.querySelector("nav"),
+        toggle = body.querySelector(".toggle"),
+        searchBtn = body.querySelector(".search-box"),
+        modeSwitch = body.querySelector(".toggle-switch"),
+        iconOpenMenu = body.querySelector(".iconClick"),
+        searchTo = body.querySelector(".openBoxTo");
+      modeText = body.querySelector(".mode-text");
+
+      toggle.addEventListener("click", () => {
+        sidebar.classList.toggle("close");
+      });
+
+      searchBtn.addEventListener("click", () => {
+        sidebar.classList.remove("close");
+      });
+
+      searchTo.addEventListener("click", () => {
+        sidebar.classList.remove("close");
+      });
+
+      iconOpenMenu.addEventListener("click", () => {
+        sidebar.classList.toggle("close");
+      });
+
+      modeSwitch.addEventListener("click", () => {
+        body.classList.toggle("dark");
+
+        if (body.classList.contains("dark")) {
+          modeText.innerText = "Light mode";
+        } else {
+          modeText.innerText = "Dark mode";
+        }
+      });
+
       var myMap = L.map("mapid").setView(
         [40.709642425352925, -74.28459538097772],
         10
