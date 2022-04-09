@@ -36,7 +36,6 @@ bool graph::AlgoDijkstra::Process(AdjacentList &adj, VisitedList &visited,
         back_trace[neighbour] = node;
         pq.emplace(neighbour);
       }
-
       update_best_dist(node, neighbour);
     }
   }
@@ -71,8 +70,9 @@ std::string graph::AlgoDijkstra::BiDijkstra(Vertex &&source, Vertex &&target) {
   WeightList distR(num_nodes, kInfinite);
   VisitedList visitedR(num_nodes, false);
   auto compare_distanceR = [&](Vertex u, Vertex v) {
-    return distR[u] > dist[v];
+    return distR[u] > distR[v];
   };
+
   MinPriorityQueue<decltype(compare_distanceR)> minPqR(compare_distanceR);
   distR[target] = 0;
   minPqR.emplace(target);
@@ -88,7 +88,7 @@ std::string graph::AlgoDijkstra::BiDijkstra(Vertex &&source, Vertex &&target) {
                        },
                        [&](Vertex current, Vertex next) {
                          if (visitedR[next]) {
-                           if (dist[next] + distR[next] <= best_dist) {
+                           if (dist[next] + distR[next] < best_dist) {
                              best_dist = dist[next] + distR[next];
                              best_vertex = next;
                            }
@@ -104,7 +104,7 @@ std::string graph::AlgoDijkstra::BiDijkstra(Vertex &&source, Vertex &&target) {
                        },
                        [&](Vertex current, Vertex next) {
                          if (visited[next]) {
-                           if (distR[next] + dist[next] <= best_dist) {
+                           if (distR[next] + dist[next] < best_dist) {
                              best_dist = distR[next] + dist[next];
                              best_vertex = next;
                            }
@@ -112,9 +112,7 @@ std::string graph::AlgoDijkstra::BiDijkstra(Vertex &&source, Vertex &&target) {
                        })) {
   }
 
-  if (!(minPq.empty() || minPqR.empty() || best_dist == kInfinite)) {
-    spdlog::info("size for {}, size back {} and best_vertex is {}",
-                 back_trace.size(), back_traceR.size(), best_vertex);
+  if (best_dist < kInfinite) {
     std::list<Vertex> shortest_path{}, shortest_pathR{};
     auto trace_it = back_trace.find(best_vertex);
     while (trace_it != back_trace.end()) {
@@ -122,13 +120,15 @@ std::string graph::AlgoDijkstra::BiDijkstra(Vertex &&source, Vertex &&target) {
       trace_it = back_trace.find(trace_it->second);
     }
 
+    shortest_path.emplace_back(best_vertex);
+
     auto trace_itR = back_traceR.find(best_vertex);
     while (trace_itR != back_traceR.end()) {
       shortest_pathR.emplace_back(trace_itR->second);
       trace_itR = back_traceR.find(trace_itR->second);
     }
 
-    shortest_path.splice(shortest_path.begin(), shortest_pathR);
+    shortest_path.splice(shortest_path.end(), shortest_pathR);
     for (const Vertex &vertex : shortest_path) {
       search_result.m_shortest_coor_list.emplace_back(m_coordinates[vertex]);
     }
@@ -140,7 +140,7 @@ std::string graph::AlgoDijkstra::BiDijkstra(Vertex &&source, Vertex &&target) {
   return search_result.ToJsonStr();
 }
 
-bool graph::AlgoDijkstra::ReadGraphRawDataFromFile() {
+bool graph::AlgoDijkstra::ReadGraphData() {
   bool ok = this->ReadFileToAdjacentList();
 
   if (ok == false) {
@@ -151,7 +151,7 @@ bool graph::AlgoDijkstra::ReadGraphRawDataFromFile() {
 }
 
 bool graph::AlgoDijkstra::InitStrategyV() {
-  bool ok = this->ReadGraphRawDataFromFile();
+  bool ok = this->ReadGraphData();
   this->m_process_status =
       ok ? GProcessStatus::PROCESSED : GProcessStatus::FAILED;
 

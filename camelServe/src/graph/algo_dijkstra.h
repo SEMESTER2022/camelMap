@@ -13,12 +13,14 @@ private:
 protected:
   template <class BreakCondition, class UpdateBestDist, class MinPQ,
             class BackTrace>
+
   bool Process(AdjacentList &, VisitedList &, WeightList &, MinPQ &,
                BackTrace &, BreakCondition, UpdateBestDist);
 
   std::string Dijkstra(Vertex &&, Vertex &&);
   std::string BiDijkstra(Vertex &&, Vertex &&);
-  bool ReadGraphRawDataFromFile();
+
+  bool ReadGraphData() override;
 
 public:
   AlgoDijkstra() : Algorithm() {}

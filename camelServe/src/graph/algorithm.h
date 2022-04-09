@@ -29,6 +29,8 @@ protected:
   bool ReadFileToAdjacentList();
   bool ReadFileToCoordinateList();
 
+  virtual bool ReadGraphData() = 0;
+
   void AddEdge(Vertex &source, Vertex &target, Weight &weight) {
     this->AddEdgeSerialize(this->m_outgoing_edges[source], target, weight);
     this->AddEdgeSerialize(this->m_incoming_edges[target], source, weight);

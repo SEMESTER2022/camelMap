@@ -9,7 +9,7 @@ std::string graph::AlgoAstar::DoQueryV(Vertex &&source, Vertex &&target) {
 }
 
 bool graph::AlgoAstar::InitStrategyV() {
-  bool ok = this->ReadGraphRawDataFromFile();
+  bool ok = this->ReadGraphData();
   this->m_process_status =
       ok ? GProcessStatus::PROCESSED : GProcessStatus::FAILED;
 
