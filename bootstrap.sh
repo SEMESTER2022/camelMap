@@ -13,5 +13,5 @@ if [ $VCPKG_EXIT_CODE -eq $VCPKG_EXIT_OK ]
 then
     cmake -S camelServe/ -B build/ -DCMAKE_INSTALL_PREFIX=../camelServe.image -DBUILD_SHARED_LIBS=ON -DCMAKE_BUILD_TYPE="Debug"
 else
-    echo -e "Bootstrap vcpkg failed, please install nessary package, libs, ... and try again"
+    echo -e "Bootstrap vcpkg failed, please try later."
 fi

@@ -1,16 +1,10 @@
 # camelMap
-camelMap is a project that finding shortest path on map in real world. Using Bidirection A* Landmark implemented in c++ and comunicate with django serverside web base through unix socket.
+camelMap is a project that finding shortest path on map in real world. Using Bidirection A* Landmark Algorithm implemented in c++ and comunicate with django serverside web base through unix socket.
 
-Installation on Ubuntu os
+Installation on Debian
 --------
 **Install python3**
 - `sudo apt-get install python3-pip`
-
-**Install cmake**
-- `python3 -m pip install cmake`
-
-**Install Django**
-- `python3 -m pip install Django`
 
 **Install essential**
 - `sudo apt-get install -y build-essential checkinstall zlib1g-dev`
@@ -21,13 +15,31 @@ Installation on Ubuntu os
 **Install download tools**
 - `sudo apt-get install curl zip unzip tar`
 
+Crossplatform installations
+--------
+**Install cmake**
+- `python3 -m pip install cmake`
+
+**Install Django**
+- `python3 -m pip install Django`
+
+#### Mongodb prerequisite
+Application using mongodb for search the nearest point because of convenience. After download and install mongo, you need to create a file ./camelServe/cs.env based on ./camelServe/cs.env.example for connecting application to mongodb instance through mongocxx-driver.
+
 Build and start server guild
 --------
-After clone this projection, your need to bootstrap project before doing anything, this only need one time when you first clone project to your system.
+After install evething, we start bootstraping project, this only need one time when you first clone project to your system.
+
 **Bootstraping**
 - `./bootstrap.sh`
 
+#### Build application:
+Depeding on what build tool you are using, run command corresponding
+- Unix `$> cd build/` then `$> make`
+- Window `$> cd build/` then `$> MSBuild .vcxproj`
+
 #### Note:
-You may see some error because of laking of some essential libs on your system, so don't worry and install those library then retry bootstraping. You may need minutes to complete this command depending on how strong your computer is. Then, start server by running service script
+This process may take minutes to complete. Take it easy. Then, start server by running service script.
+
 **Service**
 - `./service.sh`
