@@ -1,5 +1,6 @@
 # camelMap
 camelMap is a project that finding shortest path on map in real world. Using Bidirection A* Landmark Algorithm implemented in c++ and comunicate with django serverside web base through unix socket.
+<img width="960" alt="camelMap" src="https://user-images.githubusercontent.com/59383987/162615582-62798d26-731f-4196-95bf-de3d7ee5b46d.png">
 
 Installation on Unix
 --------
@@ -52,6 +53,9 @@ We start bootstraping project, this only need one time when you first clone proj
 #### Build application:
 Depeding on what build tool you are using, run command corresponding
 - Unix `$> cd build/` then `$> make` then `$ ./camelServe`
+<img width="954" alt="build" src="https://user-images.githubusercontent.com/59383987/162615786-079aff5c-dd41-4173-a3f2-f846512d932f.png">
+<img width="958" alt="build_binary" src="https://user-images.githubusercontent.com/59383987/162615832-6806e807-ded6-4b26-886d-ee3768c53e8f.png">
+
 - Window `$> cd build/` then `$> MSBuild .vcxproj`
 
 #### Note:
