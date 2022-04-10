@@ -3,8 +3,6 @@ import socket
 import sys
 import json
 
-from sklearn.feature_selection import SelectFdr
-
 DEFAULT_SOCKET = '/tmp/camel.sock'
 MAX_MSG_SIZE=65536
 
