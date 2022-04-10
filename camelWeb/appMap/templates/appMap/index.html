@@ -1,59 +1,108 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Document</title>
 
-    <link rel="icon" type="image/png" href="{% static 'appMap/img/favicon.png' %}">
-    <link rel="stylesheet" href="{% static 'appMap/css/bootstrap/bootstrap.min.css' %}">
-    <link rel="stylesheet" href="{% static 'appMap/css/leaflet/leaflet.css' %}">
-    <link rel="stylesheet" href="{% static 'appMap/css/main.css' %}">
-
+    <link
+      rel="icon"
+      type="image/png"
+      href="{% static 'appMap/img/favicon.png' %}"
+    />
+    <link
+      rel="stylesheet"
+      href="{% static 'appMap/css/bootstrap/bootstrap.min.css' %}"
+    />
+    <link
+      rel="stylesheet"
+      href="{% static 'appMap/css/leaflet/leaflet.css' %}"
+    />
+    <link
+      href="https://unpkg.com/boxicons@2.1.1/css/boxicons.min.css"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="{% static 'appMap/css/main.css' %}" />
     <script src="{% static 'appMap/js/leaflet/leaflet.js' %}"></script>
+  </head>
 
-</head>
+  <body style="margin: 0%">
+    <nav class="sidebar close">
+      <header>
+        <div class="image-text">
+          <span class="image">
+            <!--<img src="logo.png" alt="">-->
+            <i class="bx bx-search icon bx-md iconClick"></i>
+          </span>
 
-<body style="margin: 0%;">
-    <nav id="navbarSearch" class="navbar navbar-light bg-light fixed-top">
-        <div class="container-fluid">
-            <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar"
-                aria-controls="offcanvasNavbar">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <a class="navbar-brand" href="#">Camel Map</a>
-            <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasNavbar"
-                aria-labelledby="offcanvasNavbarLabel">
-                <div class="offcanvas-header">
-                    <h5 class="offcanvas-title" id="offcanvasNavbarLabel">Find your path</h5>
-                    <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas"
-                        aria-label="Close"></button>
-                </div>
-                <div class="offcanvas-body">
-                    <div>
-                        <div class="row mb-3">
-                            <div class="col">
-                                <input id="s" name="s" class="form-control" type="search" placeholder="From">
-                            </div>
-                        </div>
-                        <div class="row mb-2">
-                            <div class="col">
-                                <input id="t" name="t" class="form-control" type="search" placeholder="To">
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-9"></div>
-                            <div class="col-3">
-                                <button id="btnDoQuery" class="btn btn-outline-success">Search</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+          <div class="text logo-text">
+            <span class="name">camelMap</span>
+            <span class="profession">ENTER YOUR PATH</span>
+          </div>
         </div>
+
+        <i class="bx bx-chevron-right toggle"></i>
+      </header>
+
+      <div class="menu-bar">
+        <div class="menu">
+          <li class="search-box">
+            {% comment %} <i class="bx bx-search icon"></i> {% endcomment %}
+            <input
+              id="s"
+              name="s"
+              class="form-control"
+              type="search"
+              placeholder="From..."
+            />
+          </li>
+
+          <li class="search-box openBoxTo">
+            {% comment %} <i class="bx bx-search icon"></i> {% endcomment %}
+            <input
+              id="t"
+              name="t"
+              class="form-control"
+              type="search"
+              placeholder="To..."
+            />
+          </li>
+
+          <li>
+            <button
+              id="btnDoQuery"
+              class="btn btn-outline-success buttonSearch"
+            >
+              Search
+            </button>
+          </li>
+
+          <li />
+        </div>
+
+        <div class="bottom-content">
+          <li class="">
+            <a href="#">
+              <i class="bx bx-log-out icon"></i>
+              <span class="text nav-text">Logout</span>
+            </a>
+          </li>
+
+          <li class="mode">
+            <div class="sun-moon">
+              <i class="bx bx-moon icon moon"></i>
+              <i class="bx bx-sun icon sun"></i>
+            </div>
+            <span class="mode-text text">Dark mode</span>
+
+            <div class="toggle-switch">
+              <span class="switch"></span>
+            </div>
+          </li>
+        </div>
+      </div>
     </nav>
     <div id="mapid" style="height: 100vh"></div>
 
@@ -61,129 +110,217 @@
     <script src="{% static 'appMap/js/main.js' %}"></script>
 
     <script>
-        var myMap = L.map('mapid').setView([40.709642425352925, -74.28459538097772], 10);
+      const body = document.querySelector("body"),
+        sidebar = body.querySelector("nav"),
+        toggle = body.querySelector(".toggle"),
+        searchBtn = body.querySelector(".search-box"),
+        modeSwitch = body.querySelector(".toggle-switch"),
+        iconOpenMenu = body.querySelector(".iconClick"),
+        searchTo = body.querySelector(".openBoxTo");
+      modeText = body.querySelector(".mode-text");
 
-        var customIcon = L.icon({
-            iconUrl: "{% static 'appMap/img/marker.png' %}",
-            iconSize: [25, 25], // size of the icon
-        });
+      toggle.addEventListener("click", () => {
+        sidebar.classList.toggle("close");
+      });
 
-        var layerGroup = L.layerGroup().addTo(myMap);
+      searchBtn.addEventListener("click", () => {
+        sidebar.classList.remove("close");
+      });
 
-        function addCoorToSource(latParam, lngParam) {
-            document.getElementById('s').value = lngParam + ' ' + latParam;
+      searchTo.addEventListener("click", () => {
+        sidebar.classList.remove("close");
+      });
+
+      iconOpenMenu.addEventListener("click", () => {
+        sidebar.classList.toggle("close");
+      });
+
+      modeSwitch.addEventListener("click", () => {
+        body.classList.toggle("dark");
+
+        if (body.classList.contains("dark")) {
+          modeText.innerText = "Light mode";
+        } else {
+          modeText.innerText = "Dark mode";
+        }
+      });
+
+      var myMap = L.map("mapid").setView(
+        [40.709642425352925, -74.28459538097772],
+        10
+      );
+
+      var customIconSource = L.icon({
+        iconUrl: "{% static 'appMap/img/leaf-green.png' %}",
+        shadowUrl: "{% static 'appMap/img/leaf-shadow.png' %}",
+
+        iconSize: [38, 95], // size of the icon
+        shadowSize: [50, 64], // size of the shadow
+        iconAnchor: [22, 94], // point of the icon which will correspond to marker's location
+        shadowAnchor: [4, 62], // the same for the shadow
+        popupAnchor: [-3, -76], // point from which the popup should open relative to the iconAnchor
+      });
+
+      var customIconTarget = L.icon({
+        iconUrl: "{% static 'appMap/img/leaf-red.png' %}",
+        shadowUrl: "{% static 'appMap/img/leaf-shadow.png' %}",
+
+        iconSize: [38, 95], // size of the icon
+        shadowSize: [50, 64], // size of the shadow
+        iconAnchor: [22, 94], // point of the icon which will correspond to marker's location
+        shadowAnchor: [4, 62], // the same for the shadow
+        popupAnchor: [-3, -76], // point from which the popup should open relative to the iconAnchor
+      });
+
+      var layerGroup = L.layerGroup().addTo(myMap);
+
+      function addCoorToSource(latParam, lngParam) {
+        document.getElementById("s").value = lngParam + " " + latParam;
+        layerGroup.clearLayers();
+
+        // marker add to layer
+      }
+
+      function addCoorToTarget(latParam, lngParam) {
+        document.getElementById("t").value = lngParam + " " + latParam;
+        layerGroup.clearLayers();
+      }
+
+      myMap.on("contextmenu", function (e) {
+        layerGroup.clearLayers();
+
+        var popupContent =
+          '<div class="btn-group-vertical" role="group" aria-label="Basic outlined example">' +
+          '<button type="button" class="btn btn-outline-danger" onclick="addCoorToSource(' +
+          e.latlng.lat +
+          ", " +
+          e.latlng.lng +
+          ')">Add coordinate to source</button>' +
+          '<button type="button" class="btn btn-outline-danger" onclick="addCoorToTarget(' +
+          e.latlng.lat +
+          ", " +
+          e.latlng.lng +
+          ')">Add coordinate to target</button>';
+        ("</div>");
+
+        L.popup((autoClose = false))
+          .setLatLng(e.latlng)
+          .setContent(popupContent)
+          .addTo(layerGroup)
+          .openOn(layerGroup);
+      });
+
+      myMap.zoomControl.setPosition("bottomright");
+      L.tileLayer(
+        "https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}",
+        {
+          attribution:
+            'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+          maxZoom: 18,
+          id: "mapbox/streets-v11",
+          tileSize: 512,
+          zoomOffset: -1,
+          accessToken:
+            "pk.eyJ1IjoiYmluaGx4YWcyNzMiLCJhIjoiY2t2Zzl6MWZ6NHoxajJvcTF4cXhqcjZhZSJ9.XVSeiLAFhpMzI10yrKQxCA",
+        }
+      ).addTo(myMap);
+
+      function ActionHandleQueryResult(data) {
+        const navbarToggler = document.getElementById("offcanvasNavbar");
+        bootstrap.Offcanvas.getInstance(navbarToggler).hide();
+
+        const { error_code, msg, payload_data } = data;
+
+        if (error_code == 0) {
+          const payload = JSON.parse(payload_data);
+          if (
+            payload.hasOwnProperty("success") &&
+            payload.hasOwnProperty("msg")
+          ) {
+            if (payload.success == false) {
+              alert("coordinate out of bound!");
+              return;
+            }
+            const coors = payload.msg.shortest_coordinate;
+
+            var source = [coors[0][1], coors[0][0]];
+            var target = [
+              coors[coors.length - 1][1],
+              coors[coors.length - 1][0],
+            ];
+
+            var lines = [
+              {
+                type: "LineString",
+                coordinates: coors,
+              },
+            ];
+
             layerGroup.clearLayers();
+
+            L.geoJSON(lines).addTo(layerGroup);
+            L.marker(source, { icon: customIconSource })
+              .addTo(layerGroup)
+              .bindPopup("I am here.");
+            L.marker(target, { icon: customIconTarget })
+              .addTo(layerGroup)
+              .bindPopup("I am comming.");
+          }
+        } else {
+          alert("coordinate out of bound!");
+        }
+      }
+
+      function DoQuery() {
+        var s = document.getElementById("s").value;
+        var t = document.getElementById("t").value;
+
+        var s_arr = s.split(" ");
+        var t_arr = t.split(" ");
+
+        if (s_arr.length != 2 || t_arr.length != 2) {
+          alert("source or destination is invalid!");
+          return;
         }
 
-        function addCoorToTarget(latParam, lngParam) {
-            document.getElementById('t').value = lngParam + ' ' + latParam;
-            layerGroup.clearLayers();
+        var slng = parseFloat(s_arr[0]);
+        var slat = parseFloat(s_arr[1]);
+        var tlng = parseFloat(t_arr[0]);
+        var tlat = parseFloat(t_arr[1]);
+
+        if (isNaN(slng) || isNaN(slat) || isNaN(tlng) || isNaN(tlat)) {
+          alert("source or destination is invalid!");
+          return;
         }
 
-        myMap.on('contextmenu', function (e) {
-            layerGroup.clearLayers();
+        const extd_api_url =
+          api_url +
+          "/api/query?slng=" +
+          slng +
+          "&slat=" +
+          slat +
+          "&tlng=" +
+          tlng +
+          "&tlat=" +
+          tlat;
 
-            var popupContent =
-                '<div class="btn-group-vertical" role="group" aria-label="Basic outlined example">' +
-                '<button type="button" class="btn btn-outline-danger" onclick="addCoorToSource(' + e.latlng.lat + ', ' + e.latlng.lng + ')">Add coordinate to source</button>' +
-                '<button type="button" class="btn btn-outline-danger" onclick="addCoorToTarget(' + e.latlng.lat + ', ' + e.latlng.lng + ')">Add coordinate to target</button>'
-            '</div>';
+        fetch(extd_api_url)
+          .then((response) => response.json())
+          .then((data) => {
+            ActionHandleQueryResult(data);
+          })
+          .catch((error) => console.warn(error));
+      }
 
-            L.popup(autoClose = false)
-                .setLatLng(e.latlng)
-                .setContent(popupContent)
-                .addTo(layerGroup)
-                .openOn(layerGroup)
-        });
+      function Main() {
+        document
+          .getElementById("btnDoQuery")
+          .addEventListener("click", function () {
+            DoQuery();
+          });
+      }
 
-        myMap.zoomControl.setPosition('bottomright');
-        L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
-            attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
-            maxZoom: 18,
-            id: 'mapbox/streets-v11',
-            tileSize: 512,
-            zoomOffset: -1,
-            accessToken: 'pk.eyJ1IjoiYmluaGx4YWcyNzMiLCJhIjoiY2t2Zzl6MWZ6NHoxajJvcTF4cXhqcjZhZSJ9.XVSeiLAFhpMzI10yrKQxCA'
-        }).addTo(myMap);
-
-        function ActionHandleQueryResult(data) {
-            const navbarToggler = document.getElementById('offcanvasNavbar');
-            bootstrap.Offcanvas.getInstance(navbarToggler).hide();
-
-            const { error_code, msg, payload_data } = data;
-
-            if (error_code == 0) {
-                const payload = JSON.parse(payload_data);
-                if (payload.hasOwnProperty("success") && payload.hasOwnProperty("msg")) {
-                    if (payload.success == false) {
-                        alert('coordinate out of bound!');
-                        return;
-                    }
-                    const coors = payload.msg.shortest_coordinate;
-
-                    var source = [coors[0][1], coors[0][0]];
-                    var target = [coors[coors.length - 1][1], coors[coors.length - 1][0]];
-
-                    var lines = [{
-                        "type": "LineString",
-                        "coordinates": coors
-                    }];
-
-                    layerGroup.clearLayers();
-
-                    L.geoJSON(lines).addTo(layerGroup);
-                    L.marker(source, { icon: customIcon }).addTo(layerGroup);
-                    L.marker(target, { icon: customIcon }).addTo(layerGroup);
-                }
-            }
-            else {
-                alert('coordinate out of bound!');
-            }
-        }
-
-        const api_url = 'http://127.0.0.1:8000'
-
-        function DoQuery() {
-            var s = document.getElementById('s').value;
-            var t = document.getElementById('t').value;
-
-            var s_arr = s.split(' ');
-            var t_arr = t.split(' ');
-
-            if (s_arr.length != 2 || t_arr.length != 2) {
-                alert('source or destination is invalid!');
-                return;
-            }
-
-            var slng = parseFloat(s_arr[0]);
-            var slat = parseFloat(s_arr[1]);
-            var tlng = parseFloat(t_arr[0]);
-            var tlat = parseFloat(t_arr[1]);
-
-            if (isNaN(slng) || isNaN(slat) || isNaN(tlng) || isNaN(tlat)) {
-                alert('source or destination is invalid!');
-                return;
-            }
-
-            const extd_api_url = api_url + '/api/query?slng=' + slng + '&slat=' + slat + '&tlng=' + tlng + '&tlat=' + tlat;
-
-            fetch(extd_api_url)
-                .then(response => response.json())
-                .then(data => {
-                    ActionHandleQueryResult(data)
-                })
-                .catch(error => console.warn(error));
-        }
-
-        function Main() {
-            document.getElementById('btnDoQuery').addEventListener('click', function () {
-                DoQuery();
-            });
-        }
-
-        Main();
-
+      Main();
     </script>
-</body>
-
+  </body>
 </html>
