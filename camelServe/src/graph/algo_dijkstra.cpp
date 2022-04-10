@@ -11,9 +11,10 @@
 
 template <class BreakCondition, class UpdateBestDist, class MinPQ,
           class BackTrace>
-bool graph::AlgoDijkstra::Process(AdjacentList &adj, VisitedList &visited,
-                                  WeightList &distance, MinPQ &pq,
-                                  BackTrace &back_trace,
+bool graph::AlgoDijkstra::Process(const AdjacentList &adj,
+                                  const AdjacentWeightList &adjw,
+                                  VisitedList &visited, WeightList &distance,
+                                  MinPQ &pq, BackTrace &back_trace,
                                   BreakCondition break_condition,
                                   UpdateBestDist update_best_dist) {
   if (pq.empty() || break_condition(pq.top())) {
@@ -24,18 +25,19 @@ bool graph::AlgoDijkstra::Process(AdjacentList &adj, VisitedList &visited,
   pq.pop();
 
   if (visited[node]) {
-    return this->Process(adj, visited, distance, pq, back_trace,
+    return this->Process(adj, adjw, visited, distance, pq, back_trace,
                          break_condition, update_best_dist);
   }
 
-  for (const auto &[neighbour, weight] : adj[node]) {
-    if (!visited[neighbour]) {
-      if (Weight new_weight = distance[node] + weight;
+  for (auto neighbour_i = 0; neighbour_i < adj[node].size(); ++neighbour_i) {
+    if (Vertex neighbour = adj[node][neighbour_i]) {
+      if (Weight new_weight = distance[node] + adjw[node][neighbour_i];
           new_weight < distance[neighbour]) {
         distance[neighbour] = new_weight;
         back_trace[neighbour] = node;
         pq.emplace(neighbour);
       }
+
       update_best_dist(node, neighbour);
     }
   }
@@ -51,11 +53,12 @@ std::string graph::AlgoDijkstra::Dijkstra(Vertex &&source, Vertex &&target) {
 }
 
 std::string graph::AlgoDijkstra::BiDijkstra(Vertex &&source, Vertex &&target) {
-  SearchResult search_result{};
-  auto num_nodes = this->m_outgoing_edges.size();
+  SearchReply search_reply{};
+  spdlog::info("Bidijkstra on source {} to target {}", source, target);
+  auto num_nodes = this->m_outgoing_vertexs.size();
 
   if (source == target || source >= num_nodes || target >= num_nodes) {
-    return search_result.ToJsonStr();
+    return search_reply.ToJsonStr();
   }
 
   std::map<Vertex, Vertex> back_trace{};
@@ -79,7 +82,8 @@ std::string graph::AlgoDijkstra::BiDijkstra(Vertex &&source, Vertex &&target) {
 
   Weight best_dist = kInfinite;
   Vertex best_vertex = 0;
-  while (this->Process(this->m_outgoing_edges, visited, dist, minPq, back_trace,
+  while (this->Process(this->m_outgoing_vertexs, this->m_outgoing_weights,
+                       visited, dist, minPq, back_trace,
                        [&](auto) {
                          return minPqR.empty()
                                     ? false
@@ -94,8 +98,8 @@ std::string graph::AlgoDijkstra::BiDijkstra(Vertex &&source, Vertex &&target) {
                            }
                          }
                        }) &&
-         this->Process(this->m_incoming_edges, visitedR, distR, minPqR,
-                       back_traceR,
+         this->Process(this->m_incoming_vertexs, this->m_incoming_weights,
+                       visitedR, distR, minPqR, back_traceR,
                        [&](auto) {
                          return minPq.empty()
                                     ? false
@@ -130,14 +134,16 @@ std::string graph::AlgoDijkstra::BiDijkstra(Vertex &&source, Vertex &&target) {
 
     shortest_path.splice(shortest_path.end(), shortest_pathR);
     for (const Vertex &vertex : shortest_path) {
-      search_result.m_shortest_coor_list.emplace_back(m_coordinates[vertex]);
+      search_reply.m_shortest_coor_list.emplace_back(m_coordinates[vertex]);
     }
 
-    search_result.m_is_success = true;
-    search_result.m_total_dist = best_dist;
+    search_reply.m_is_success = true;
+    search_reply.m_total_dist = best_dist;
   }
 
-  return search_result.ToJsonStr();
+  spdlog::info("OK12");
+
+  return search_reply.ToJsonStr();
 }
 
 bool graph::AlgoDijkstra::ReadGraphData() {
@@ -156,7 +162,7 @@ bool graph::AlgoDijkstra::InitStrategyV() {
       ok ? GProcessStatus::PROCESSED : GProcessStatus::FAILED;
 
   spdlog::info("Init strategy dijkstra success with number of vertexs: {}",
-               this->m_outgoing_edges.size());
+               this->m_outgoing_vertexs.size());
   return ok;
 }
 

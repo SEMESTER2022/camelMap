@@ -9,16 +9,19 @@
 
 #include "spdlog/spdlog.h"
 
-void graph::Algorithm::AddEdgeSerialize(TargetList &list, Vertex &node,
+void graph::Algorithm::AddEdgeSerialize(VertexList &vertex_list,
+                                        WeightList &weight_list, Vertex &node,
                                         Weight &weight) {
-  for (auto &[target, weight_target] : list) {
-    if (target == node && weight_target > weight) {
-      weight_target = weight;
+  for (auto i = 0; i < vertex_list.size(); ++i) {
+    if (vertex_list[i] == node && weight_list[i] > weight) {
+      weight_list[i] = weight;
       return;
     }
   }
 
-  list.emplace_back(std::make_pair(node, weight));
+  vertex_list.emplace_back(node);
+  weight_list.emplace_back(weight);
+  return;
 }
 
 bool graph::Algorithm::ReadFileToCoordinateList() {
@@ -64,8 +67,10 @@ bool graph::Algorithm::ReadFileToAdjacentList() {
   Weight weight;
 
   infile >> nodes >> edges;
-  this->m_outgoing_edges.resize(nodes);
-  this->m_incoming_edges.resize(nodes);
+  this->m_outgoing_vertexs.resize(nodes);
+  this->m_outgoing_weights.resize(nodes);
+  this->m_incoming_vertexs.resize(nodes);
+  this->m_incoming_weights.resize(nodes);
 
   while (infile >> source >> target >> weight) {
     --source;
@@ -82,15 +87,16 @@ graph::Algorithm::FindNearestSourceDestV(Coordinate src_coor,
   Vertex src{}, tgt{};
   bool ok = MongoQueryf([&](mongocxx::client &client) {
     mongocxx::collection col = client[DB_CAMEL_MAP][COL_US_NEW_YORK_COOR];
-    mongocxx::stdx::optional<bsoncxx::document::value> doc = col.find_one(make_document(kvp(
-        "location",
-        make_document(kvp(
-            "$near",
+    mongocxx::stdx::optional<bsoncxx::document::value> doc =
+        col.find_one(make_document(kvp(
+            "location",
             make_document(kvp(
-                "$geometry",
-                make_document(kvp("type", "Point"),
-                              kvp("coordinates",
-                                  make_array(src_coor[0], src_coor[1]))))))))));
+                "$near", make_document(kvp(
+                             "$geometry",
+                             make_document(kvp("type", "Point"),
+                                           kvp("coordinates",
+                                               make_array(src_coor[0],
+                                                          src_coor[1]))))))))));
 
     if (!doc) {
       spdlog::info("Not found nearest source coor");
@@ -104,7 +110,6 @@ graph::Algorithm::FindNearestSourceDestV(Coordinate src_coor,
       return false;
     }
 
-    spdlog::info("values {}", src_it->get_int32().value);
     src = static_cast<Vertex>(src_it->get_int32().value);
 
     doc = col.find_one(make_document(kvp(

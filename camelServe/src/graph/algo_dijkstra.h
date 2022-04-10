@@ -14,11 +14,13 @@ protected:
   template <class BreakCondition, class UpdateBestDist, class MinPQ,
             class BackTrace>
 
-  bool Process(AdjacentList &, VisitedList &, WeightList &, MinPQ &,
-               BackTrace &, BreakCondition, UpdateBestDist);
+  bool Process(const AdjacentList &adj, const AdjacentWeightList &adjw,
+               VisitedList &visited, WeightList &distance, MinPQ &pq,
+               BackTrace &back_trace, BreakCondition break_condition,
+               UpdateBestDist update_best_dist);
 
-  std::string Dijkstra(Vertex &&, Vertex &&);
-  std::string BiDijkstra(Vertex &&, Vertex &&);
+  std::string Dijkstra(Vertex &&source, Vertex &&target);
+  std::string BiDijkstra(Vertex &&source, Vertex &&target);
 
   bool ReadGraphData() override;
 
@@ -26,7 +28,7 @@ public:
   AlgoDijkstra() : Algorithm() {}
   bool InitStrategyV() override;
 
-  std::string DoQueryV(Vertex &&, Vertex &&) override;
+  std::string DoQueryV(Vertex &&source, Vertex &&target) override;
 };
 
 } // namespace graph

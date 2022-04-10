@@ -4,8 +4,6 @@
 namespace graph {
 class Request {
 private:
-
-
 public:
 };
 } // namespace graph

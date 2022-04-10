@@ -151,13 +151,14 @@ bool net::UnixServer::HandleRequestAndSendReply(std::shared_ptr<Sock> sock) {
     return send_response();
   }
 
-  auto search_result = GraphSearchf(std::move(source), std::move(target));
-  if (!search_result.has_value()) {
+  spdlog::info("Find neareast source dest success");
+  auto search_reply = GraphSearchf(std::move(source), std::move(target));
+  if (!search_reply.has_value()) {
     reply = Reply{false, "An error occured, please try later"};
     return send_response();
   }
 
-  reply = Reply{true, std::move(*search_result)};
+  reply = Reply{true, std::move(*search_reply)};
   return send_response();
 }
 

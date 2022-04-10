@@ -14,8 +14,8 @@ using VisitedList = std::vector<bool>;
 using WeightList = std::vector<Weight>;
 using PotentialWeightList = std::vector<double>;
 using VertexList = std::vector<Vertex>;
-using TargetList = std::vector<std::pair<Vertex, Weight>>;
-using AdjacentList = std::vector<TargetList>;
+using AdjacentList = std::vector<VertexList>;
+using AdjacentWeightList = std::vector<WeightList>;
 using CoordinateList = std::vector<Coordinate>;
 
 template <class WeightCompare>
@@ -31,14 +31,20 @@ enum GProcessStatus : uint32_t {
   PROCESSED,
 };
 
-enum GResultTypes : uint32_t {
-  TOTAL_DIST_ONLY = 0,
-  SHORTEST_COOR,
+enum GReplyType : uint32_t {
+  TOTAL_DIST_ONLY = 0, // for testing
+  SHORTEST_COOR_ONLY,
   SHORTEST_AND_VISITTED_COOR,
 };
 
-struct SearchResult {
-  GResultTypes m_result_type;
+enum GSearchAlgorithm : uint32_t {
+  DIJKSTRA,
+  BIDIJKSTRA,
+  BIASTAR_LANDMARK,
+};
+
+struct SearchReply {
+  GReplyType m_reply_type;
   bool m_is_success{false};
   Weight m_total_dist{0};
   CoordinateList m_shortest_coor_list;

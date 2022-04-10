@@ -6,21 +6,21 @@
 #include "fmt/ranges.h"
 
 namespace graph {
-struct GResultTypeDef {
-  GResultTypes type;
+struct GReplyTypeDef {
+  GReplyType type;
   std::string name;
 };
 
 // clang-format off
-const GResultTypeDef ResultTypeDefs[] =
+const GReplyTypeDef ResultTypeDefs[] =
 {
-    {GResultTypes::TOTAL_DIST_ONLY, "total distance only"},
-    {GResultTypes::SHORTEST_COOR, "shortest path coordinate"},
-    {GResultTypes::SHORTEST_AND_VISITTED_COOR, "shortest path and visitted coordinate"}
+    {GReplyType::TOTAL_DIST_ONLY, "total distance only"},
+    {GReplyType::SHORTEST_COOR_ONLY, "shortest path coordinate"},
+    {GReplyType::SHORTEST_AND_VISITTED_COOR, "shortest path and visitted coordinate"}
 };
 // clang-format on
 
-std::string SearchResult::ToJsonStr() {
+std::string SearchReply::ToJsonStr() {
   std::string out =
       fmt::format(R"(
             {{
@@ -31,7 +31,7 @@ std::string SearchResult::ToJsonStr() {
               "visited_none_shortest_coordinate": {}
             }}
           )",
-                  ResultTypeDefs[this->m_result_type].name, this->m_is_success,
+                  ResultTypeDefs[this->m_reply_type].name, this->m_is_success,
                   this->m_total_dist, this->m_shortest_coor_list,
                   this->m_visitted_none_shortest_coor_list);
 

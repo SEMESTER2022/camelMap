@@ -1,0 +1,12 @@
+{
+    "readme": "Chronological by date of first commit: add yourself at the end",
+    "contributors": [
+        {
+            "name": "Binh Nguyen",
+            "email": [
+                "binhlxag273@gmail.com"
+            ],
+            "description": "Project design and team lead. Application structure, interface design, build system, etc"
+        }
+    ]
+}

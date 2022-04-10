@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
+#include <vector>
 
 #include "spdlog/spdlog.h"
 
@@ -12,7 +13,8 @@
 namespace graph {
 class Algorithm {
 private:
-  void AddEdgeSerialize(TargetList &list, Vertex &node, Weight &weight);
+  void AddEdgeSerialize(VertexList &vertex_list, WeightList &weight_list,
+                        Vertex &node, Weight &weight);
 
 protected:
   std::string m_path_in_coor;
@@ -22,8 +24,11 @@ protected:
 
   uint32_t m_process_status{0};
 
-  AdjacentList m_incoming_edges;
-  AdjacentList m_outgoing_edges;
+  AdjacentList m_incoming_vertexs;
+  AdjacentWeightList m_incoming_weights;
+  AdjacentList m_outgoing_vertexs;
+  AdjacentWeightList m_outgoing_weights;
+
   CoordinateList m_coordinates;
 
   bool ReadFileToAdjacentList();
@@ -32,8 +37,10 @@ protected:
   virtual bool ReadGraphData() = 0;
 
   void AddEdge(Vertex &source, Vertex &target, Weight &weight) {
-    this->AddEdgeSerialize(this->m_outgoing_edges[source], target, weight);
-    this->AddEdgeSerialize(this->m_incoming_edges[target], source, weight);
+    this->AddEdgeSerialize(this->m_outgoing_vertexs[source],
+                           this->m_outgoing_weights[source], target, weight);
+    this->AddEdgeSerialize(this->m_incoming_vertexs[target],
+                           this->m_incoming_weights[target], source, weight);
   }
 
 public:

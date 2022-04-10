@@ -32,6 +32,13 @@ struct MongoProps {
   std::string password;
 
   std::string ToUriStr() {
+#ifdef USE_MONGO_CLOUD
+    return this->host_name.empty() || this->user_name.empty() ||
+                   this->password.empty()
+               ? ""
+               : fmt::format("mongodb+srv://{}:{}@{}", this->user_name,
+                             this->password, this->host_name);
+#else
     if (this->user_name.empty() && this->password.empty()) {
       return fmt::format("mongodb://{}:{}", this->host_name, this->port);
     }
@@ -41,6 +48,7 @@ struct MongoProps {
                ? ""
                : fmt::format("mongodb://{}:{}@{}:{}", this->user_name,
                              this->password, this->host_name, this->port);
+#endif
   }
 };
 
