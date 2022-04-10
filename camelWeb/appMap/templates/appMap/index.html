@@ -150,9 +150,26 @@
         10
       );
 
-      var customIcon = L.icon({
-        iconUrl: "{% static 'appMap/img/marker.png' %}",
-        iconSize: [25, 25], // size of the icon
+      var customIconSource = L.icon({
+        iconUrl: "{% static 'appMap/img/leaf-green.png' %}",
+        shadowUrl: "{% static 'appMap/img/leaf-shadow.png' %}",
+
+        iconSize: [38, 95], // size of the icon
+        shadowSize: [50, 64], // size of the shadow
+        iconAnchor: [22, 94], // point of the icon which will correspond to marker's location
+        shadowAnchor: [4, 62], // the same for the shadow
+        popupAnchor: [-3, -76], // point from which the popup should open relative to the iconAnchor
+      });
+
+      var customIconTarget = L.icon({
+        iconUrl: "{% static 'appMap/img/leaf-red.png' %}",
+        shadowUrl: "{% static 'appMap/img/leaf-shadow.png' %}",
+
+        iconSize: [38, 95], // size of the icon
+        shadowSize: [50, 64], // size of the shadow
+        iconAnchor: [22, 94], // point of the icon which will correspond to marker's location
+        shadowAnchor: [4, 62], // the same for the shadow
+        popupAnchor: [-3, -76], // point from which the popup should open relative to the iconAnchor
       });
 
       var layerGroup = L.layerGroup().addTo(myMap);
@@ -209,111 +226,46 @@
       ).addTo(myMap);
 
       function ActionHandleQueryResult(data) {
-        //Draw Line Map
         const navbarToggler = document.getElementById("offcanvasNavbar");
         bootstrap.Offcanvas.getInstance(navbarToggler).hide();
 
-        myMap.on("contextmenu", function (e) {
-          layerGroup.clearLayers();
-
-          var popupContent =
-            '<div class="btn-group-vertical" role="group" aria-label="Basic outlined example">' +
-            '<button type="button" class="btn btn-outline-danger" onclick="addCoorToSource(' +
-            e.latlng.lat +
-            ", " +
-            e.latlng.lng +
-            ')">Add coordinate to source</button>' +
-            '<button type="button" class="btn btn-outline-danger" onclick="addCoorToTarget(' +
-            e.latlng.lat +
-            ", " +
-            e.latlng.lng +
-            ')">Add coordinate to target</button>';
-          ("</div>");
-
-          L.popup((autoClose = false))
-            .setLatLng(e.latlng)
-            .setContent(popupContent)
-            .addTo(layerGroup)
-            .openOn(layerGroup);
-        });
-
-        myMap.zoomControl.setPosition("bottomright");
-        L.tileLayer(
-          "https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}",
-          {
-            attribution:
-              'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
-            maxZoom: 18,
-            id: "mapbox/streets-v11",
-            tileSize: 512,
-            zoomOffset: -1,
-            accessToken:
-              "pk.eyJ1IjoiYmluaGx4YWcyNzMiLCJhIjoiY2t2Zzl6MWZ6NHoxajJvcTF4cXhqcjZhZSJ9.XVSeiLAFhpMzI10yrKQxCA",
-          }
-        ).addTo(myMap);
-
-        function ActionHandleQueryResult(data) {
-          const navbarToggler = document.getElementById("offcanvasNavbar");
-          bootstrap.Offcanvas.getInstance(navbarToggler).hide();
-
-          const { error_code, msg, payload_data } = data;
-
-          if (error_code == 0) {
-            const payload = JSON.parse(payload_data);
-            if (
-              payload.hasOwnProperty("success") &&
-              payload.hasOwnProperty("msg")
-            ) {
-              if (payload.success == false) {
-                alert("coordinate out of bound!");
-                return;
-              }
-              const coors = payload.msg.shortest_coordinate;
-
-              var source = [coors[0][1], coors[0][0]];
-              var target = [
-                coors[coors.length - 1][1],
-                coors[coors.length - 1][0],
-              ];
-
-              var lines = [
-                {
-                  type: "LineString",
-                  coordinates: coors,
-                },
-              ];
-
-              layerGroup.clearLayers();
-
-              L.geoJSON(lines).addTo(layerGroup);
-              L.marker(source, { icon: customIcon }).addTo(layerGroup);
-              L.marker(target, { icon: customIcon }).addTo(layerGroup);
-            }
-          } else {
-            alert("coordinate out of bound!");
-          }
-        }
         const { error_code, msg, payload_data } = data;
 
         if (error_code == 0) {
           const payload = JSON.parse(payload_data);
-          const coors = payload.coors;
+          if (
+            payload.hasOwnProperty("success") &&
+            payload.hasOwnProperty("msg")
+          ) {
+            if (payload.success == false) {
+              alert("coordinate out of bound!");
+              return;
+            }
+            const coors = payload.msg.shortest_coordinate;
 
-          var source = [coors[0][1], coors[0][0]];
-          var target = [coors[coors.length - 1][1], coors[coors.length - 1][0]];
+            var source = [coors[0][1], coors[0][0]];
+            var target = [
+              coors[coors.length - 1][1],
+              coors[coors.length - 1][0],
+            ];
 
-          var lines = [
-            {
-              type: "LineString",
-              coordinates: coors,
-            },
-          ];
+            var lines = [
+              {
+                type: "LineString",
+                coordinates: coors,
+              },
+            ];
 
-          layerGroup.clearLayers();
+            layerGroup.clearLayers();
 
-          L.geoJSON(lines).addTo(layerGroup);
-          L.marker(source, { icon: customIcon }).addTo(layerGroup);
-          L.marker(target, { icon: customIcon }).addTo(layerGroup);
+            L.geoJSON(lines).addTo(layerGroup);
+            L.marker(source, { icon: customIconSource })
+              .addTo(layerGroup)
+              .bindPopup("I am here.");
+            L.marker(target, { icon: customIconTarget })
+              .addTo(layerGroup)
+              .bindPopup("I am comming.");
+          }
         } else {
           alert("coordinate out of bound!");
         }
