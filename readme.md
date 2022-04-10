@@ -23,19 +23,35 @@ Crossplatform installations
 **Install Django**
 - `python3 -m pip install Django`
 
-#### Mongodb prerequisite
+Mongodb prerequisite
+--------
 Application use mongodb for searching the nearest points. After download and install mongo, you need to create a file ./camelServe/cs.env based on ./camelServe/cs.env.example entry to connect application to mongod instance through mongocxx-driver.
+
+**Configure file cs.env**
+- `CS_MONGO_HOST_NAME=127.0.0.1` 
+- `CS_MONGO_PORT=27017` 
+- `CS_MONGO_USER_NAME=` 
+- `CS_MONGO_PASSWORD=` 
+- `CS_SERVICE_THREAD_POOL_SIZE=100` 
+
+**Create Database**
+- Open MongoDBCompass and connect to 127.0.0.1:27017 
+- Create a DatabaseName with name: `CamelMap`
+- Create a Collection with name: `US_NewYork_Coor`
+- Import a data file into US_NewYork_Coor: [File USA-road-mongo.NY](https://drive.google.com/file/d/1cpRJ0yV_DZ1Ixb8ANOl6Ttjn9Qyi7Sir/view?usp=sharing).
+
+
 
 Build and start server guild
 --------
-We start bootstraping project, this only need one time when you first clone project into your system.
+We start bootstraping project, this only need one time when you first clone project into your system or everytime you change the configuration
 
 **Bootstraping**
 - `./bootstrap.sh`
 
 #### Build application:
 Depeding on what build tool you are using, run command corresponding
-- Unix `$> cd build/` then `$> make`
+- Unix `$> cd build/` then `$> make` then `$ ./camelServe`
 - Window `$> cd build/` then `$> MSBuild .vcxproj`
 
 #### Note:
