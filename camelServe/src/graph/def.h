@@ -32,24 +32,28 @@ enum GProcessStatus : uint32_t {
   PROCESSED,
 };
 
-enum GReplyType : uint32_t {
-  TOTAL_DIST_ONLY = 0, // for testing
-  SHORTEST_COOR_ONLY,
-  SHORTEST_AND_VISITTED_COOR,
+enum GResponseReq : int32_t {
+  NO_RESPONSE_REQ = -1,
+  TOTAL_DIST_ONLY = 0,
+  INHERIT_AND_SHORTEST_PATH_COORS,
+  INHERIT_AND_TRAVERSE_COORS,
 };
 
-enum GSearchAlgorithm : uint32_t {
+enum GAlgorithmReq : int32_t {
+  NO_ALGORITHM_REQ = -1,
+  BI_DIJKSTRA = 0,
+  BI_ASTAR,
   DIJKSTRA,
-  BIDIJKSTRA,
-  BIASTAR_LANDMARK,
+  ASTAR,
+  BI_ASTAR_LANDMARK,
 };
 
-struct SearchReply {
-  GReplyType m_reply_type;
+struct GSearchReply {
   bool m_is_success{false};
   Weight m_total_dist{0};
-  CoordinateList m_shortest_coor_list;
-  CoordinateList m_visitted_none_shortest_coor_list;
+  CoordinateList m_shortest_path_coors{};
+  CoordinateList m_traverse_f_coors{};
+  CoordinateList m_traverse_r_coors{};
 
   std::string ToJsonStr();
 };

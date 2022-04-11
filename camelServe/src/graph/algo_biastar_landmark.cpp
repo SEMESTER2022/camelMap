@@ -237,7 +237,7 @@ bool graph::AlgoBiAstarLandmark::Process(
 
 std::string graph::AlgoBiAstarLandmark::BiAstarLandmark(Vertex source,
                                                         Vertex target) {
-  SearchReply search_reply{};
+  GSearchReply search_reply{};
   spdlog::info("BiAstar landmark on source {} to target", source, target);
   auto num_nodes = this->m_outgoing_vertexs.size();
 

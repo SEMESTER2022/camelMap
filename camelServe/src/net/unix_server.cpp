@@ -1,13 +1,12 @@
-#include <algorithm>
 #include <string.h>
 #include <string>
-#include <vector>
+
+#include "graph/request.h"
+#include "net/sock.h"
+#include "net/unix_server.h"
 
 #include "fmt/core.h"
 #include "fmt/format.h"
-#include "graph/graph.h"
-#include "net/sock.h"
-#include "net/unix_server.h"
 #include "spdlog/spdlog.h"
 
 net::UnixServer::UnixServer() {}
@@ -86,16 +85,16 @@ std::shared_ptr<net::Sock> net::UnixServer::Accept() const {
 }
 
 struct Reply {
-  bool success{true};
+  bool is_success{true};
   std::string msg{""};
 
   std::string ToStr() {
     return fmt::format(R"(
                   {{
-                    "success": {},
+                    "is_success": {},
                     "msg": {}
                   }})",
-                       success, msg);
+                       is_success, msg);
   }
 };
 
@@ -129,36 +128,15 @@ bool net::UnixServer::HandleRequestAndSendReply(std::shared_ptr<Sock> sock) {
     return send_response();
   }
 
-  std::vector<std::string> coors;
-  size_t last_pos = 0, pos = query.find(';');
-  while (pos != std::string::npos) {
-    coors.emplace_back(std::string(query.c_str() + last_pos, pos - last_pos));
-    last_pos = pos + 1;
-    pos = query.find(';', pos + 1);
+  graph::Request request{query};
+  std::optional<std::string> result = request.Handle();
+
+  if (result.has_value()) {
+    reply = Reply{true, *result};
+  } else {
+    reply = Reply{false, "Handle request failed"};
   }
 
-  if (coors.size() != 4) {
-    reply = Reply{false, "Coordinate is not valid"};
-    return send_response();
-  }
-
-  auto &&[ok, source, target] =
-      GraphFindNearestSourceDestf({std::stod(coors[0]), std::stod(coors[1])},
-                                  {std::stod(coors[2]), std::stod(coors[3])});
-
-  if (!ok) {
-    reply = Reply{false, "An error occured, please try later"};
-    return send_response();
-  }
-
-  spdlog::info("Find neareast source dest success");
-  auto search_reply = GraphSearchf(std::move(source), std::move(target));
-  if (!search_reply.has_value()) {
-    reply = Reply{false, "An error occured, please try later"};
-    return send_response();
-  }
-
-  reply = Reply{true, std::move(*search_reply)};
   return send_response();
 }
 

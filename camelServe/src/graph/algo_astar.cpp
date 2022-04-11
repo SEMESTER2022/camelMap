@@ -55,12 +55,14 @@ graph::AlgoAstar::BiAstarPotentialFunction_r(Vertex source, Vertex target,
 }
 
 template <class BreakCondition, class UpdateBestDist, class MinPQ,
-          class BackTrace, class CalculatePotentialWeight>
+          class BackTrace, class CalculatePotentialWeight,
+          class TraceTraversedCoor>
 bool graph::AlgoAstar::Process(
     const AdjacentList &adj, VisitedList &visited,
     PotentialWeightList &distance, MinPQ &pq, BackTrace &back_trace,
     BreakCondition break_condition, UpdateBestDist update_best_dist,
-    CalculatePotentialWeight calculate_potential_weight) {
+    CalculatePotentialWeight calculate_potential_weight,
+    TraceTraversedCoor trace_traversed_coor) {
   if (pq.empty() || break_condition(pq.top())) {
     return false;
   }
@@ -71,7 +73,7 @@ bool graph::AlgoAstar::Process(
   if (visited[node]) {
     return this->Process(adj, visited, distance, pq, back_trace,
                          break_condition, update_best_dist,
-                         calculate_potential_weight);
+                         calculate_potential_weight, trace_traversed_coor);
   }
 
   for (auto neighbour_i = 0; neighbour_i < adj[node].size(); ++neighbour_i) {
@@ -90,12 +92,14 @@ bool graph::AlgoAstar::Process(
   }
 
   visited[node] = true;
+  trace_traversed_coor(node);
   return true;
 }
 
 std::string graph::AlgoAstar::BiAstar(Vertex &&source, Vertex &&target) {
-  SearchReply search_reply{};
-  spdlog::info("BiAstar on source {} to target {}", source, target);
+  GSearchReply search_reply{};
+  spdlog::info("BiAstar on source {} to target {} with response type {}",
+               source, target, this->m_response_req);
   auto num_nodes = this->m_outgoing_vertexs.size();
 
   if (source == target || source >= num_nodes || target >= num_nodes) {
@@ -103,6 +107,7 @@ std::string graph::AlgoAstar::BiAstar(Vertex &&source, Vertex &&target) {
   }
 
   std::map<Vertex, Vertex> back_trace{};
+  CoordinateList traversed_coors{};
   PotentialWeightList dist(num_nodes, kInfinitePotentialWeight);
   VisitedList visited(num_nodes, false);
   auto compare_distance = [&](Vertex u, Vertex v) { return dist[u] > dist[v]; };
@@ -111,6 +116,7 @@ std::string graph::AlgoAstar::BiAstar(Vertex &&source, Vertex &&target) {
   minPq.emplace(source);
 
   std::map<Vertex, Vertex> back_traceR{};
+  CoordinateList traversed_coorsR{};
   PotentialWeightList distR(num_nodes, kInfinitePotentialWeight);
   VisitedList visitedR(num_nodes, false);
   auto compare_distanceR = [&](Vertex u, Vertex v) {
@@ -146,6 +152,9 @@ std::string graph::AlgoAstar::BiAstar(Vertex &&source, Vertex &&target) {
                    this->BiAstarPotentialFunction_f(
                        source, target,
                        this->m_outgoing_vertexs[current][next_i]);
+          },
+          [&](Vertex node) {
+            traversed_coors.emplace_back(this->m_coordinates[node]);
           }) &&
       this->Process(
           this->m_incoming_vertexs, visitedR, distR, minPqR, back_traceR,
@@ -169,6 +178,9 @@ std::string graph::AlgoAstar::BiAstar(Vertex &&source, Vertex &&target) {
                    this->BiAstarPotentialFunction_r(
                        target, source,
                        this->m_incoming_vertexs[current][next_i]);
+          },
+          [&](Vertex node) {
+            traversed_coorsR.emplace_back(this->m_coordinates[node]);
           })) {
   }
 
@@ -196,7 +208,16 @@ std::string graph::AlgoAstar::BiAstar(Vertex &&source, Vertex &&target) {
         actual_best_dist += this->m_incoming_weights[*prev][vertex];
       }
       prev = vertex;
-      search_reply.m_shortest_coor_list.emplace_back(m_coordinates[vertex]);
+
+      if (this->m_response_req >=
+          GResponseReq::INHERIT_AND_SHORTEST_PATH_COORS) {
+        search_reply.m_shortest_path_coors.emplace_back(m_coordinates[vertex]);
+      }
+    }
+
+    if (this->m_response_req >= GResponseReq::INHERIT_AND_TRAVERSE_COORS) {
+      search_reply.m_traverse_f_coors = std::move(traversed_coors);
+      search_reply.m_traverse_r_coors = std::move(traversed_coorsR);
     }
 
     search_reply.m_is_success = true;

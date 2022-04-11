@@ -3,10 +3,8 @@
 
 #include <limits>
 #include <memory>
-#include <mutex>
 #include <optional>
 #include <queue>
-#include <type_traits>
 #include <vector>
 
 #include "config.h"
@@ -20,10 +18,31 @@ private:
   std::unique_ptr<Algorithm> m_search_strategy;
 
 public:
+  inline GAlgorithmReq GetAlgorithmReq() {
+    return this->m_search_strategy->GetAlgorithmReq();
+  }
+
+  inline GResponseReq GetResponseReq() {
+    return this->m_search_strategy->GetResponseReq();
+  }
+
+  inline void SetAlgorithmReq(GAlgorithmReq algorithm_req) {
+    this->m_search_strategy->SetAlgorithmReq(algorithm_req);
+  }
+
+  inline void SetResponseReq(GResponseReq response_req) {
+    this->m_search_strategy->SetResponseReq(response_req);
+  }
+
   bool Init() {
     // default bidijkstra algorithm
-    this->m_search_strategy = std::move(std::make_unique<AlgoAstar>());
-    return this->m_search_strategy->InitStrategyV();
+    bool ok = this->AssignRuntimeStrategy(std::make_unique<AlgoAstar>());
+    if (ok) {
+      this->SetAlgorithmReq(GAlgorithmReq::BI_ASTAR);
+      this->SetResponseReq(GResponseReq::INHERIT_AND_SHORTEST_PATH_COORS);
+    }
+
+    return ok;
   }
 
   bool Shutdown() { return true; }
@@ -33,8 +52,9 @@ public:
     return this->m_search_strategy->EnabledV();
   }
 
-  void AssignRuntimeStrategy(std::unique_ptr<Algorithm> search_strategy) {
+  bool AssignRuntimeStrategy(std::unique_ptr<Algorithm> search_strategy) {
     this->m_search_strategy = std::move(search_strategy);
+    return this->m_search_strategy->InitStrategyV();
   };
 
   std::string DoSearch(Vertex &&source, Vertex &&target) {

@@ -19,8 +19,8 @@ class QueryResponse():
         return {'error_code': self.error_code, 'msg': self.msg, 'payload_data': self.payload_data}
 
 class UnixClient():
-    def __init__(self, source_lng, source_lat, target_lng, target_lat):
-        data = str(source_lng) + ";" + str(source_lat) + ";" + str(target_lng) + ";" + str(target_lat) + ";\n"
+    def __init__(self, source_lng, source_lat, target_lng, target_lat, response_req, algorithm_req):
+        data = str(source_lng) + ";" + str(source_lat) + ";" + str(target_lng) + ";" + str(target_lat) + ";" + str(response_req) + ";" + str(algorithm_req) + ";\n"
         self.query = data.encode()
         self.response = QueryResponse()
 

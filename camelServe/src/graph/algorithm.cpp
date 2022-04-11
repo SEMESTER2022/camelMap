@@ -146,3 +146,10 @@ graph::Algorithm::FindNearestSourceDestV(Coordinate src_coor,
 
   return {false, 0, 0};
 }
+
+void graph::Algorithm::AddEdge(Vertex &source, Vertex &target, Weight &weight) {
+  this->AddEdgeSerialize(this->m_outgoing_vertexs[source],
+                         this->m_outgoing_weights[source], target, weight);
+  this->AddEdgeSerialize(this->m_incoming_vertexs[target],
+                         this->m_incoming_weights[target], source, weight);
+}

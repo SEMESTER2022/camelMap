@@ -16,8 +16,8 @@
   <script src="{% static 'appMap/js/leaflet/leaflet.js' %}"></script>
 </head>
 
-<body style="margin: 0%">
-  <nav class="sidebar close">
+<body style="margin: 0%" class="dark">
+  <nav class="sidebar">
     <header>
       <div class="image-text">
         <span class="image">
@@ -47,6 +47,36 @@
         </li>
 
         <li>
+          <div class="form-check">
+            <input class="form-check-input" type="radio" name="response_req" id="response_req_1"
+              style="cursor: pointer;" checked>
+            <label class="form-check-label" for="response_req_1" style="color: white; cursor: pointer;">Shortest path
+              only</label>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="radio" name="response_req" id="response_req_2"
+              style="cursor: pointer;" value="option2">
+            <label class="form-check-label" for="response_req_2" style="color: white; cursor: pointer;;">Traversed
+              points</label>
+          </div>
+        </li>
+
+        <li>
+          <div class="form-check">
+            <input class="form-check-input" type="radio" name="algorithm_req" id="algorithm_req_1"
+              style="cursor: pointer;" checked>
+            <label class="form-check-label" for="algorithm_req_1" style="color: white; cursor: pointer;;">Bidirectional
+              Dijkstra</label>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="radio" name="algorithm_req" id="algorithm_req_2"
+              style="cursor: pointer;">
+            <label class="form-check-label" for="algorithm_req_2" style="color: white; cursor: pointer;;">Bidirectional
+              A*</label>
+          </div>
+        </li>
+
+        <li>
           <button id="btnDoQuery" class="btn btn-outline-success buttonSearch">
             Search
           </button>
@@ -66,7 +96,7 @@
             <i class="bx bx-moon icon moon"></i>
             <i class="bx bx-sun icon sun"></i>
           </div>
-          <span class="mode-text text">Dark mode</span>
+          <span class="mode-text text">Light mode</span>
 
           <div class="toggle-switch">
             <span class="switch"></span>
@@ -122,23 +152,23 @@
     );
 
     var customIconSource = L.icon({
-      iconUrl: "{% static 'appMap/img/leaf-green.png' %}",
+      iconUrl: "{% static 'appMap/img/from_loc.png' %}",
       shadowUrl: "{% static 'appMap/img/leaf-shadow.png' %}",
 
-      iconSize: [38, 95], // size of the icon
-      shadowSize: [50, 64], // size of the shadow
-      iconAnchor: [22, 94], // point of the icon which will correspond to marker's location
+      iconSize: [50, 50], // size of the icon
+      shadowSize: [50, 50], // size of the shadow
+      iconAnchor: [22, 50], // point of the icon which will correspond to marker's location
       shadowAnchor: [4, 62], // the same for the shadow
       popupAnchor: [-3, -76], // point from which the popup should open relative to the iconAnchor
     });
 
     var customIconTarget = L.icon({
-      iconUrl: "{% static 'appMap/img/leaf-red.png' %}",
+      iconUrl: "{% static 'appMap/img/to_loc.png' %}",
       shadowUrl: "{% static 'appMap/img/leaf-shadow.png' %}",
 
-      iconSize: [38, 95], // size of the icon
-      shadowSize: [50, 64], // size of the shadow
-      iconAnchor: [22, 94], // point of the icon which will correspond to marker's location
+      iconSize: [40, 40], // size of the icon
+      shadowSize: [50, 50], // size of the shadow
+      iconAnchor: [22, 40], // point of the icon which will correspond to marker's location
       shadowAnchor: [4, 62], // the same for the shadow
       popupAnchor: [-3, -76], // point from which the popup should open relative to the iconAnchor
     });
@@ -197,23 +227,20 @@
     ).addTo(myMap);
 
     function ActionHandleQueryResult(data) {
-      // const navbarToggler = document.getElementById("offcanvasNavbar");
-      // bootstrap.Offcanvas.getInstance(navbarToggler).hide();
-
       const { error_code, msg, payload_data } = data;
 
       if (error_code == 0) {
         const payload = JSON.parse(payload_data);
         if (
-          payload.hasOwnProperty("success") &&
+          payload.hasOwnProperty("is_success") &&
           payload.hasOwnProperty("msg")
         ) {
           if (payload.success == false) {
             alert("coordinate out of bound!");
             return;
           }
-          const coors = payload.msg.shortest_coordinate;
 
+          const coors = payload.msg.shortest_path_coors;
           var source = [coors[0][1], coors[0][0]];
           var target = [
             coors[coors.length - 1][1],
@@ -245,6 +272,8 @@
     function DoQuery() {
       var s = document.getElementById("s").value;
       var t = document.getElementById("t").value;
+      var response_req = document.getElementById("response_req_1").checked ? 1 : 2;
+      var algorithm_req = document.getElementById("algorithm_req_1").checked ? 0 : 1;
 
       var s_arr = s.split(" ");
       var t_arr = t.split(" ");
@@ -271,7 +300,11 @@
         "&tlng=" +
         tlng +
         "&tlat=" +
-        tlat;
+        tlat +
+        "&response_req=" +
+        response_req +
+        "&algorithm_req=" +
+        algorithm_req;
 
       fetch(extd_api_url)
         .then((response) => response.json())

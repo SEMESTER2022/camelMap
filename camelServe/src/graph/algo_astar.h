@@ -25,11 +25,13 @@ protected:
                                              Vertex node);
 
   template <class BreakCondition, class UpdateBestDist, class MinPQ,
-            class BackTrace, class CalculatePotentialWeight>
+            class BackTrace, class CalculatePotentialWeight,
+            class TraceTraversedCoor>
   bool Process(const AdjacentList &adj, VisitedList &visited,
                PotentialWeightList &distance, MinPQ &pq, BackTrace &back_trace,
                BreakCondition break_condition, UpdateBestDist update_best_dist,
-               CalculatePotentialWeight calculate_potential_weight);
+               CalculatePotentialWeight calculate_potential_weight,
+               TraceTraversedCoor trace_traversed_coor);
 
   std::string BiAstar(Vertex &&source, Vertex &&target);
 

@@ -14,10 +14,12 @@ def apiQuery(request):
             source_lat = float(request.GET.get('slat', ''))
             target_lng = float(request.GET.get('tlng', ''))
             target_lat = float(request.GET.get('tlat', ''))
+            response_req = int(request.GET.get('response_req', ''))
+            algorithm_req = int(request.GET.get('algorithm_req', ''))
 
-            print(f"{source_lng} . {source_lat} . {target_lng} . {target_lat}")
+            print(f"{source_lng} . {source_lat} . {target_lng} . {target_lat} . {response_req} . {algorithm_req}")
 
-            request_obj = unixClient.UnixClient(source_lng, source_lat, target_lng, target_lat)
+            request_obj = unixClient.UnixClient(source_lng, source_lat, target_lng, target_lat, response_req, algorithm_req)
             return JsonResponse(request_obj.DoRequest())
 
         except:
