@@ -25,11 +25,11 @@ void graph::Algorithm::AddEdgeSerialize(VertexList &vertex_list,
 }
 
 bool graph::Algorithm::ReadFileToCoordinateList() {
-  if (this->m_path_in_coor.empty()) {
+  if (CS_MAP_DATA_COOR_LOCATION == "") {
     return false;
   }
 
-  std::fstream infile(this->m_path_in_coor, std::ios_base::in);
+  std::fstream infile(CS_MAP_DATA_COOR_LOCATION, std::ios_base::in);
   if (infile.is_open() == false) {
     return false;
   }
@@ -53,11 +53,11 @@ bool graph::Algorithm::ReadFileToCoordinateList() {
 }
 
 bool graph::Algorithm::ReadFileToAdjacentList() {
-  if (this->m_path_in_dist.empty()) {
+  if (CS_MAP_DATA_DIST_LOCATION == "") {
     return false;
   }
 
-  std::fstream infile(this->m_path_in_dist, std::ios_base::in);
+  std::fstream infile(CS_MAP_DATA_DIST_LOCATION, std::ios_base::in);
   if (infile.is_open() == false) {
     return false;
   }

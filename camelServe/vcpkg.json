@@ -1,7 +1,7 @@
 {
     "name": "cs",
     "version": "1.0.1",
-    "description": "Server side app finde shortest path using A* algorithm",
+    "description": "Server side app finding shortest path using bidirectional A* landmark algorithm",
     "dependencies": [
         "mongo-cxx-driver",
         "fmt",

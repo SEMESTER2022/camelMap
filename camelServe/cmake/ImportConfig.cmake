@@ -1,5 +1,5 @@
-file(READ ${CMAKE_SOURCE_DIR}/cs.env cs_env)
 option(USE_MONGO_CLOUD "Enable using mongo cloud" ON)
+option(USE_ALGO_BIASTAR_LANDMARK "Enable using bidirectional astar landmark" OFF)
 
 # ------------------------------------------------------------------ #
 

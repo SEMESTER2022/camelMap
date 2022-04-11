@@ -3,14 +3,17 @@
 
 // clang-format off
 #cmakedefine USE_MONGO_CLOUD
+#cmakedefine USE_ALGO_BIASTAR_LANDMARK
 
 #define CS_VERSION_MAJOR "${CS_VERSION_MAJOR}"
 #define CS_VERSION_MINOR "${CS_VERSION_MINOR}"
 #define CS_VERSION_PATCH "${CS_VERSION_PATCH}"
 
-#define CS_MAP_DATA_COOR_LOCATION "${CS_DATA_DIR}/USA-road-d.NY.co"
-#define CS_MAP_DATA_DIST_LOCATION "${CS_DATA_DIR}/USA-road-d.NY.gr"
-#define CS_MAP_DATA_TIME_LOCATION "${CS_DATA_DIR}/USA-road-t.NY.gr"
+#define CS_MAP_DATA_COOR_LOCATION                   "${CS_DATA_DIR}/USA-road-d.NY.co"
+#define CS_MAP_DATA_DIST_LOCATION                   "${CS_DATA_DIR}/USA-road-d.NY.gr"
+#define CS_MAP_DATA_TIME_LOCATION                   "${CS_DATA_DIR}/USA-road-t.NY.gr"
+#define CS_MAP_DATA_ASTAR_LANDMARKS_LOCATION        "CS_DATA_DIR}/USA-astar-landmark.NY.gr"
+#define CS_MAP_DATA_ASTAR_OUTPUT_LOCATION           "${CS_DATA_DIR}/USA-astar-processed.NY.gr"
 
 #define CS_MONGO_HOST_NAME      "${CS_MONGO_HOST_NAME}"
 #define CS_MONGO_PORT           "${CS_MONGO_PORT}"

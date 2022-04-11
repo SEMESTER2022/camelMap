@@ -10,7 +10,7 @@
 #include <vector>
 
 #include "config.h"
-#include "graph/algo_dijkstra.h"
+#include "graph/algo_astar.h"
 #include "graph/algorithm.h"
 #include "graph/def.h"
 
@@ -22,11 +22,7 @@ private:
 public:
   bool Init() {
     // default bidijkstra algorithm
-    this->m_search_strategy = std::make_unique<AlgoDijkstra>();
-    this->m_search_strategy->SetInFile(CS_MAP_DATA_COOR_LOCATION,
-                                       CS_MAP_DATA_DIST_LOCATION,
-                                       CS_MAP_DATA_TIME_LOCATION);
-
+    this->m_search_strategy = std::move(std::make_unique<AlgoAstar>());
     return this->m_search_strategy->InitStrategyV();
   }
 

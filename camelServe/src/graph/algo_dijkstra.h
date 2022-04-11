@@ -9,11 +9,9 @@
 
 namespace graph {
 class AlgoDijkstra : public Algorithm {
-private:
 protected:
   template <class BreakCondition, class UpdateBestDist, class MinPQ,
             class BackTrace>
-
   bool Process(const AdjacentList &adj, const AdjacentWeightList &adjw,
                VisitedList &visited, WeightList &distance, MinPQ &pq,
                BackTrace &back_trace, BreakCondition break_condition,
@@ -29,6 +27,8 @@ public:
   bool InitStrategyV() override;
 
   std::string DoQueryV(Vertex &&source, Vertex &&target) override;
+
+private:
 };
 
 } // namespace graph

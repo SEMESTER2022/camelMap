@@ -9,10 +9,11 @@
 namespace graph {
 using Vertex = uint32_t;
 using Weight = uint64_t;
+using PotentialWeight = double;
 using Coordinate = std::array<double, 2>;
 using VisitedList = std::vector<bool>;
 using WeightList = std::vector<Weight>;
-using PotentialWeightList = std::vector<double>;
+using PotentialWeightList = std::vector<PotentialWeight>;
 using VertexList = std::vector<Vertex>;
 using AdjacentList = std::vector<VertexList>;
 using AdjacentWeightList = std::vector<WeightList>;
@@ -21,12 +22,12 @@ using CoordinateList = std::vector<Coordinate>;
 template <class WeightCompare>
 using MinPriorityQueue = std::priority_queue<Vertex, VertexList, WeightCompare>;
 
-const Weight kInfinite = std::numeric_limits<Weight>::max();
+const Weight kInfiniteWeight = std::numeric_limits<Weight>::max();
+const PotentialWeight kInfinitePotentialWeight =
+    std::numeric_limits<PotentialWeight>::max();
 
 enum GProcessStatus : uint32_t {
-  NONE = 0,
-  UNPROCESS,
-  ONPROCESSING,
+  UNPROCESS = 0,
   FAILED,
   PROCESSED,
 };
