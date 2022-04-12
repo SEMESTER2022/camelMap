@@ -46,36 +46,48 @@
           <input id="t" name="t" class="form-control" type="search" placeholder="To..." />
         </li>
 
-        <li>
-          <div class="form-check">
-            <input class="form-check-input" type="radio" name="response_req" id="response_req_1"
-              style="cursor: pointer;" checked>
-            <label class="form-check-label" for="response_req_1" style="color: white; cursor: pointer;">Shortest path
-              only</label>
+        <div class="card mb-3 " style="max-width: auto; margin-top: 10px; margin-bottom: 0 !important;">
+          <div class="card-header text">Search Strategy</div>
+          <div class="card-body">
+            <li class="li_checkbox">
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="response_req" id="response_req_1"style="cursor: pointer;" checked>
+                <label class="form-check-label text" for="response_req_1" style="cursor: pointer; font-weight: lighter;">Shortest path only</label>
+              </div>
+            </li>
+            <li class="li_checkbox">
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="response_req" id="response_req_2"
+                  style="cursor: pointer;" value="option2">
+                <label class="form-check-label text" for="response_req_2" style="cursor: pointer; font-weight: lighter;">Traversed points</label>
+              </div>
+            </li>
           </div>
-          <div class="form-check">
-            <input class="form-check-input" type="radio" name="response_req" id="response_req_2"
-              style="cursor: pointer;" value="option2">
-            <label class="form-check-label" for="response_req_2" style="color: white; cursor: pointer;;">Traversed
-              points</label>
-          </div>
-        </li>
+        </div>
 
-        <li>
-          <div class="form-check">
-            <input class="form-check-input" type="radio" name="algorithm_req" id="algorithm_req_1"
-              style="cursor: pointer;" checked>
-            <label class="form-check-label" for="algorithm_req_1" style="color: white; cursor: pointer;;">Bidirectional
-              Dijkstra</label>
-          </div>
-          <div class="form-check">
-            <input class="form-check-input" type="radio" name="algorithm_req" id="algorithm_req_2"
-              style="cursor: pointer;">
-            <label class="form-check-label" for="algorithm_req_2" style="color: white; cursor: pointer;;">Bidirectional
-              A*</label>
-          </div>
-        </li>
 
+        <div class="card mb-3 "style="max-width: auto; margin-top: 12px !important;">
+          <div class="card-header text">Algorithm</div>
+          <div class="card-body">
+            <li class="li_checkbox">
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="algorithm_req" id="algorithm_req_1"
+                  style="cursor: pointer;" checked>
+                <label class="form-check-label text" for="algorithm_req_1" style="cursor: pointer; font-weight: lighter;">Bidirectional
+                  Dijkstra</label>
+              </div>
+              </li>
+            <li class="li_checkbox">
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="algorithm_req" id="algorithm_req_2"
+                  style="cursor: pointer;">
+                <label class="form-check-label text" for="algorithm_req_2" style="cursor: pointer; font-weight: lighter;">Bidirectional
+                  A*</label>
+              </div>
+            </li>
+          </div>
+        </div>
+    
         <li>
           <button id="btnDoQuery" class="btn btn-outline-success buttonSearch">
             Search
@@ -111,6 +123,10 @@
   <script src="{% static 'appMap/js/main.js' %}"></script>
 
   <script>
+  
+  // EFFECT NAVBAR APP
+  function EffectApp()
+  {
     const body = document.querySelector("body"),
       sidebar = body.querySelector("nav"),
       toggle = body.querySelector(".toggle"),
@@ -118,7 +134,7 @@
       modeSwitch = body.querySelector(".toggle-switch"),
       iconOpenMenu = body.querySelector(".iconClick"),
       searchTo = body.querySelector(".openBoxTo");
-    modeText = body.querySelector(".mode-text");
+      modeText = body.querySelector(".mode-text");
 
     toggle.addEventListener("click", () => {
       sidebar.classList.toggle("close");
@@ -145,13 +161,15 @@
         modeText.innerText = "Dark mode";
       }
     });
+  }
+    
+    
+    //SET VIEW FOR MAP
+    var myMap = L.map("mapid").setView([40.709642425352925, -74.28459538097772],10);
 
-    var myMap = L.map("mapid").setView(
-      [40.709642425352925, -74.28459538097772],
-      10
-    );
-
-    var customIconSource = L.icon({
+    //SET ICON
+    var customIconSource = L.icon(
+    {
       iconUrl: "{% static 'appMap/img/from_loc.png' %}",
       shadowUrl: "{% static 'appMap/img/leaf-shadow.png' %}",
 
@@ -173,13 +191,13 @@
       popupAnchor: [-3, -76], // point from which the popup should open relative to the iconAnchor
     });
 
+    //SET LAYERGROUP
     var layerGroup = L.layerGroup().addTo(myMap);
 
+    //FUNCTION ADD SOURCE AND TARGET
     function addCoorToSource(latParam, lngParam) {
       document.getElementById("s").value = lngParam + " " + latParam;
       layerGroup.clearLayers();
-
-      // marker add to layer
     }
 
     function addCoorToTarget(latParam, lngParam) {
@@ -187,6 +205,22 @@
       layerGroup.clearLayers();
     }
 
+
+    // ZOOM MAP
+    myMap.zoomControl.setPosition("bottomright");
+    L.tileLayer("https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}",
+      {
+        attribution:'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+        maxZoom: 18,
+        id: "mapbox/streets-v11",
+        tileSize: 512,
+        zoomOffset: -1,
+        accessToken:"pk.eyJ1IjoiYmluaGx4YWcyNzMiLCJhIjoiY2t2Zzl6MWZ6NHoxajJvcTF4cXhqcjZhZSJ9.XVSeiLAFhpMzI10yrKQxCA",
+      }).addTo(myMap);
+  
+
+
+    //POPUP
     myMap.on("contextmenu", function (e) {
       layerGroup.clearLayers();
 
@@ -211,20 +245,7 @@
         .openOn(layerGroup);
     });
 
-    myMap.zoomControl.setPosition("bottomright");
-    L.tileLayer(
-      "https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}",
-      {
-        attribution:
-          'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
-        maxZoom: 18,
-        id: "mapbox/streets-v11",
-        tileSize: 512,
-        zoomOffset: -1,
-        accessToken:
-          "pk.eyJ1IjoiYmluaGx4YWcyNzMiLCJhIjoiY2t2Zzl6MWZ6NHoxajJvcTF4cXhqcjZhZSJ9.XVSeiLAFhpMzI10yrKQxCA",
-      }
-    ).addTo(myMap);
+
 
     function ActionHandleQueryResult(data) {
       const { error_code, msg, payload_data } = data;
@@ -314,6 +335,48 @@
         .catch((error) => console.warn(error));
     }
 
+    // LAYERS CONTROL
+      var OpenTopoMap = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+      maxZoom: 17,
+      attribution: 'Map data: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, <a href="http://viewfinderpanoramas.org">SRTM</a> | Map style: &copy; <a href="https://opentopomap.org">OpenTopoMap</a> (<a href="https://creativecommons.org/licenses/by-sa/3.0/">CC-BY-SA</a>)'
+    });
+    OpenTopoMap.addTo(myMap);
+    // Google Map Layer
+      googleStreets = L.tileLayer('http://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',{
+          maxZoom: 20,
+          subdomains:['mt0','mt1','mt2','mt3']
+      });
+    googleStreets.addTo(myMap);
+
+    // Satelite Layer
+      googleSat = L.tileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',{
+        maxZoom: 20,
+        subdomains:['mt0','mt1','mt2','mt3']
+      });
+    googleSat.addTo(myMap);
+
+    // OSM
+      var osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+      });
+      osm.addTo(myMap);
+
+    /*===================================================
+                      LAYER CONTROL               
+    ===================================================*/
+
+    var baseLayers = {
+        "Satellite":googleSat,
+        "Google Map":googleStreets,
+        "OpenStreetMap": osm,
+        "Topographic Map": OpenTopoMap
+    };
+
+    L.control.layers(baseLayers).addTo(myMap);
+
+
+
+
     function Main() {
       document
         .getElementById("btnDoQuery")
@@ -321,7 +384,7 @@
           DoQuery();
         });
     }
-
+    EffectApp();
     Main();
   </script>
 </body>

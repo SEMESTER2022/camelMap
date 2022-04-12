@@ -15,6 +15,7 @@
     --primary-color-light: #F6F5FF;
     --toggle-color: #DDD;
     --text-color: #707070;
+    --card-color:#FFF;
 
     /* ====== Transition ====== */
     --tran-03: all 0.2s ease;
@@ -41,6 +42,7 @@ body.dark{
     --primary-color-light: #3a3b3c;
     --toggle-color: #fff;
     --text-color: #ccc;
+    --card-color: #3a3b3c;
 }
 
 /* ===== Sidebar ===== */
@@ -49,7 +51,7 @@ body.dark{
     top: 0;
     left: 0;
     height: 100%;
-    width: 300px;
+    width: 350px;
     padding: 10px 10px;
     background: var(--sidebar-color);
     transition: var(--tran-05);
@@ -67,7 +69,14 @@ body.dark{
     align-items: center;
     margin-top: 10px;
 }
-
+.li_checkbox
+{
+    height: 50px;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    margin-top: 0 !important;
+}
 .sidebar header .image,
 .sidebar .icon{
     min-width: 60px;
@@ -89,11 +98,20 @@ body.dark{
     color: var(--text-color);
     transition: var(--tran-03);
 }
-
+.sidebar .card{
+    background-color: var( --card-color);
+    transition: var(--tran-03);
+    position: relative;
+}
+.sidebar.close .card{
+    height: 22%;
+}
+.sidebar.close .card-body{
+    position: absolute; 
+}
 .sidebar .text{
-    font-size: 17px;
-    font-weight: 500;
-    white-space: nowrap;
+    font-size: 18px;
+    font-weight: 400;
     opacity: 1;
 }
 .sidebar.close .text{
@@ -285,5 +303,6 @@ body.dark .switch::before{
 
 .buttonSearch
 {
-  font-size: 13px;
+  font-size: 15px;
+  width: 100%;
 }
