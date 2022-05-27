@@ -129,6 +129,7 @@ std::string graph::AlgoDijkstra::BiDijkstra(Vertex &&source, Vertex &&target) {
 
   if (best_dist < kInfiniteWeight) {
     if (this->m_response_req >= GResponseReq::INHERIT_AND_SHORTEST_PATH_COORS) {
+      spdlog::info("best_vertex: {}", best_vertex);
       std::list<Vertex> shortest_path{}, shortest_pathR{};
       auto trace_it = back_trace.find(best_vertex);
 

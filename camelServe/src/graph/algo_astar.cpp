@@ -79,13 +79,17 @@ bool graph::AlgoAstar::Process(
   for (auto neighbour_i = 0; neighbour_i < adj[node].size(); ++neighbour_i) {
     if (Vertex neighbour = adj[node][neighbour_i]; !visited[neighbour]) {
       Weight new_weight = distance[node] + adjw[node][neighbour_i];
+      bool emqueue = false;
       if (new_weight < distance[neighbour]) {
+        emqueue = true;
         distance[neighbour] = new_weight;
         back_trace[neighbour] = node;
       }
 
       potential_list[neighbour] = calculate_potential_weight(neighbour);
-      pq.emplace(neighbour);
+      if (emqueue) {
+        pq.emplace(neighbour);
+      }
 
       update_best_dist(neighbour);
     }
@@ -169,7 +173,7 @@ std::string graph::AlgoAstar::BiAstar(Vertex &&source, Vertex &&target) {
             }
           },
           [&](Vertex next) {
-            return this->BiAstarPotentialFunction_r(target, source, next);
+            return this->BiAstarPotentialFunction_r(source, target, next);
           },
           [&](Vertex node) {
             traversed_coorsR.emplace_back(this->m_coordinates[node]);
@@ -177,6 +181,7 @@ std::string graph::AlgoAstar::BiAstar(Vertex &&source, Vertex &&target) {
   }
 
   if (best_dist < kInfiniteWeight) {
+    spdlog::info("*********** best_vertex: {}", best_vertex);
     std::list<Vertex> shortest_path{}, shortest_pathR{};
     auto trace_it = back_trace.find(best_vertex);
     while (trace_it != back_trace.end()) {
