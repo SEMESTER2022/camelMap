@@ -54,7 +54,7 @@ private:
   template <class BreakCondition, class UpdateBestDist, class MinPQ,
             class BackTrace, class CalculatePotentialWeight>
   bool Process(const AdjacentList &adj, visited &visited,
-               PotentialWeightList &distance, MinPQ &pq, BackTrace &back_trace,
+               WeightList &distance, MinPQ &pq, BackTrace &back_trace,
                BreakCondition break_condition, UpdateBestDist update_best_dist,
                CalculatePotentialWeight calculate_potential_weight);
 

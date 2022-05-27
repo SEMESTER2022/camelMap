@@ -5,6 +5,7 @@
 #include <queue>
 #include <string>
 #include <vector>
+#include <limits>
 
 namespace graph {
 using Vertex = uint32_t;

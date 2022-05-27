@@ -200,7 +200,7 @@ bool graph::AlgoBiAstarLandmark::PreprocessingAStarLandmark() {
 template <class BreakCondition, class UpdateBestDist, class MinPQ,
           class BackTrace, class CalculatePotentialWeight>
 bool graph::AlgoBiAstarLandmark::Process(
-    const AdjacentList &adj, visited &visited, PotentialWeightList &distance,
+    const AdjacentList &adj, visited &visited, WeightList &distance,
     MinPQ &pq, BackTrace &back_trace, BreakCondition break_condition,
     UpdateBestDist update_best_dist,
     CalculatePotentialWeight calculate_potential_weight) {
@@ -246,7 +246,7 @@ std::string graph::AlgoBiAstarLandmark::BiAstarLandmark(Vertex source,
   }
 
   std::map<Vertex, Vertex> back_trace{};
-  PotentialWeightList dist(num_nodes, kInfinitePotentialWeight);
+  WeightList dist(num_nodes, kInfinitePotentialWeight);
   VisitedList visited(num_nodes, false);
   auto compare_distance = [&](Vertex u, Vertex v) { return dist[u] > dist[v]; };
   MinPriorityQueue<decltype(compare_distance)> minPq(compare_distance);
@@ -254,7 +254,7 @@ std::string graph::AlgoBiAstarLandmark::BiAstarLandmark(Vertex source,
   minPq.emplace(source);
 
   std::map<Vertex, Vertex> back_traceR{};
-  PotentialWeightList distR(num_nodes, kInfinitePotentialWeight);
+  WeightList distR(num_nodes, kInfinitePotentialWeight);
   VisitedList visitedR(num_nodes, false);
   auto compare_distanceR = [&](Vertex u, Vertex v) {
     return distR[u] > distR[v];
