@@ -42,6 +42,10 @@ set_verbose(CMAKE_TOOLCHAIN_FILE "${CMAKE_CURRENT_SOURCE_DIR}/external/vcpkg/scr
             "https://github.com/microsoft/vcpkg")
 
 project(CS CXX)
+set(CS_VERSION_MAJOR 1)
+set(CS_VERSION_MINOR 0)
+set(CS_VERSION_PATCH 0)
+
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
@@ -159,4 +163,13 @@ install(TARGETS camelServe
 if (CS_TEST)
     enable_testing()
     add_subdirectory(test)
+endif()
+
+if (CMAKE_BUILD_TYPE STREQUAL "Release")
+    include(InstallRequiredSystemLibraries)
+    set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")
+    set(CPACK_PACKAGE_VERSION_MAJOR "${CS_VERSION_MAJOR}")
+    set(CPACK_PACKAGE_VERSION_MINOR "${CS_VERSION_MINOR}")
+    set(CPACK_PACKAGE_VERSION_PATCH "${CS_VERSION_PATCH}")
+    include(CPack)
 endif()
