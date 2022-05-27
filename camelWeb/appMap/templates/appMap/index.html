@@ -123,7 +123,6 @@
   <script src="{% static 'appMap/js/main.js' %}"></script>
 
   <script>
-  
   // EFFECT NAVBAR APP
   function EffectApp()
   {
@@ -181,7 +180,7 @@
     });
 
     var customIconTarget = L.icon({
-      iconUrl: "{% static 'appMap/img/to_loc.png' %}",
+      iconUrl: "{% static 'appMap/img/to32.png' %}",
       shadowUrl: "{% static 'appMap/img/leaf-shadow.png' %}",
 
       iconSize: [40, 40], // size of the icon
@@ -193,32 +192,42 @@
 
     
     var customIconF_Coor = L.icon({
-      iconUrl: "{% static 'appMap/img/index.png' %}",
-      shadowUrl: "{% static 'appMap/img/leaf-shadow.png' %}",
+      iconUrl: "{% static 'appMap/img/f16.png' %}",
 
-      iconSize: [40, 40], // size of the icon
+      iconSize: [20, 20], // size of the icon
       shadowSize: [50, 50], // size of the shadow
-      iconAnchor: [22, 40], // point of the icon which will correspond to marker's location
+      iconAnchor: [15, 20], // point of the icon which will correspond to marker's location
+      shadowAnchor: [4, 62], // the same for the shadow
+      popupAnchor: [-3, -76], // point from which the popup should open relative to the iconAnchor
+    });
+
+    var customIconR_Coor = L.icon({
+      iconUrl: "{% static 'appMap/img/r16.png' %}",
+
+      iconSize: [20, 20], // size of the icon
+      shadowSize: [50, 50], // size of the shadow
+      iconAnchor:[15, 20], // point of the icon which will correspond to marker's location
       shadowAnchor: [4, 62], // the same for the shadow
       popupAnchor: [-3, -76], // point from which the popup should open relative to the iconAnchor
     });
     //SET LAYERGROUP
     var layerGroup = L.layerGroup().addTo(myMap);
     var layerF = L.layerGroup().addTo(myMap);
-
+     
     //FUNCTION ADD SOURCE AND TARGET
     function addCoorToSource(latParam, lngParam) {
       document.getElementById("s").value = lngParam + " " + latParam;
-
-      // myMap.addLayer(marker);
-      // marker.bindPopup("<b>Hello world!</b><br />I am a popup.").openPopup();
-      // layerGroup.clearLayers();
-      
+      layerGroup.clearLayers();
+        L.marker([latParam, lngParam],{ icon: customIconSource })
+            .addTo(layerGroup)
+            .bindPopup("I am here.");  
     }
 
     function addCoorToTarget(latParam, lngParam) {
       document.getElementById("t").value = lngParam + " " + latParam;
-      layerGroup.clearLayers();
+        L.marker(target, { icon: customIconTarget })
+            .addTo(layerGroup)
+            .bindPopup("I am comming."); 
     }
 
 
@@ -238,8 +247,6 @@
 
     //POPUP
     myMap.on("contextmenu", function (e) {
-      layerGroup.clearLayers();
-
       var popupContent =
         '<div class="btn-group-vertical" role="group" aria-label="Basic outlined example">' +
         '<button type="button" class="btn btn-outline-danger" onclick="addCoorToSource(' +
@@ -300,15 +307,19 @@
             .addTo(layerGroup)
             .bindPopup("I am comming.");
 
-          console.log('count',payload.msg.traverse_f_coors.length);
-          console.log('list',payload.msg.traverse_f_coors);
-          console.log('data',payload)
           for(let i = 0; i < payload.msg.traverse_f_coors.length; i++)
           {
-            var abc = payload.msg.traverse_f_coors[i];
-            L.marker([abc[1],abc[0]], { icon: customIconF_Coor })
+            var forward = payload.msg.traverse_f_coors[i];
+            L.marker([forward[1],forward[0]], { icon: customIconF_Coor })
             .addTo(layerF);
           }
+          for(let i = 0; i < payload.msg.traverse_r_coors.length; i++)
+          {
+            var reverse = payload.msg.traverse_r_coors[i];
+            L.marker([reverse[1],reverse[0]], { icon: customIconR_Coor })
+            .addTo(layerF);
+          }
+
         }
       } else {
         alert("coordinate out of bound!");
