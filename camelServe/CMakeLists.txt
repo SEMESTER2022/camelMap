@@ -36,10 +36,17 @@ endif()
 option(CS_PEDANTIC "Enable extra warning using standard language flags" OFF)
 option(CS_WERROR "Halt compiler warning into errors" OFF)
 option(CS_TEST "Generate test target module when debug" ${CS_DEBUG_MODE})
+option(CS_USE_EXTERNAL_VCPKG "Using built in vcpkg" OFF)
 
-set_verbose(CMAKE_TOOLCHAIN_FILE "${CMAKE_CURRENT_SOURCE_DIR}/external/vcpkg/scripts/buildsystems/vcpkg.cmake" CACHE STRING
-            "vcpkg tool chain file - crossplatform c++ package manager "
-            "https://github.com/microsoft/vcpkg")
+if (NOT CS_USE_EXTERNAL_VCPKG)
+    set_verbose(CMAKE_TOOLCHAIN_FILE "${CMAKE_CURRENT_SOURCE_DIR}/external/vcpkg/scripts/buildsystems/vcpkg.cmake" CACHE STRING
+                "vcpkg tool chain file - crossplatform c++ package manager "
+                "https://github.com/microsoft/vcpkg")
+else()
+    if (NOT CMAKE_TOOLCHAIN_FILE)
+        message(FATAL_ERROR "Not found tool chain file given")
+    endif()
+endif()
 
 project(CS CXX)
 set(CS_VERSION_MAJOR 1)
